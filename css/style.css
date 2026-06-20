@@ -71,8 +71,8 @@ body {
   display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
   box-shadow: 0 4px 14px rgba(239,68,68,.4);
 }
-.brand-name { font-size: .95rem; font-weight: 700; color: #fff; line-height: 1.2; }
-.brand-sub  { font-size: .60rem; color: rgba(255,255,255,.40); letter-spacing: .5px; text-transform: uppercase; }
+.brand-name { font-size: 1.18rem; font-weight: 800; color: #fff; line-height: 1.2; }
+.brand-sub  { font-size: .68rem; color: rgba(255,255,255,.45); letter-spacing: .6px; text-transform: uppercase; }
 .nav-pill   {
   border-radius: 20px !important; padding: .36rem .95rem !important;
   font-size: .86rem; color: rgba(255,255,255,.72) !important;
@@ -91,16 +91,16 @@ body {
 }
 .nav-brand-center { flex-grow: 1; text-align: center; padding: 0 .75rem; }
 .nav-logo-box {
-  width: 64px; min-width: 64px; height: 64px;
+  width: 84px; min-width: 84px; height: 84px;
   border-radius: 50%; overflow: hidden; flex-shrink: 0;
-  box-shadow: 0 2px 12px rgba(0,0,0,.55);
+  box-shadow: 0 2px 14px rgba(0,0,0,.6);
 }
 .nav-logo {
-  width: 64px; height: 64px;
+  width: 84px; height: 84px;
   object-fit: cover; display: block;
   transition: transform .2s;
 }
-.nav-logo:hover { transform: scale(1.08); }
+.nav-logo:hover { transform: scale(1.06); }
 .nav-links-row {
   display: flex; flex-direction: row; justify-content: center;
   align-items: center; gap: .25rem; flex-wrap: wrap;
@@ -108,9 +108,8 @@ body {
   list-style: none; padding-left: 0;
 }
 @media (max-width: 576px) {
-  .nav-logo-box { width: 46px; min-width: 46px; height: 46px; }
-  .nav-logo { width: 46px; height: 46px; }
-  .brand-name { font-size: .82rem; }
+  .nav-logo-box { width: 54px; min-width: 54px; height: 54px; }
+  .nav-logo { width: 54px; height: 54px; }
 }
 
 /* ===== HERO ===== */

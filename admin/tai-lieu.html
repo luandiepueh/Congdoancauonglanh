@@ -40,7 +40,10 @@
   <main class="admin-main">
     <div class="admin-topbar">
       <div><div class="page-title">Quản lý Tài liệu</div><div class="page-sub">Upload file hoặc thêm link tài liệu cho đoàn viên tải xuống</div></div>
-      <button class="btn btn-danger fw-semibold" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i>Thêm tài liệu</button>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-warning fw-semibold" onclick="openBatchModal()"><i class="bi bi-folder-plus me-1"></i>Upload nhiều file</button>
+        <button class="btn btn-danger fw-semibold" onclick="openModal()"><i class="bi bi-plus-lg me-1"></i>Thêm tài liệu</button>
+      </div>
     </div>
 
     <div class="admin-content">
@@ -146,6 +149,55 @@
         <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
         <button class="btn btn-danger fw-semibold px-4" onclick="saveDoc()">
           <i class="bi bi-save me-1"></i><span id="saveBtnTxt">Thêm tài liệu</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL UPLOAD NHIỀU FILE -->
+<div class="modal fade" id="batchModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header" style="background:#e65100;color:#fff">
+        <h5 class="modal-title"><i class="bi bi-folder-plus me-2"></i>Upload nhiều file cùng lúc</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal" id="batchCloseX"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Chọn file <span class="text-danger">*</span></label>
+          <input type="file" class="form-control" id="batchFiles" multiple
+                 accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+          <small class="text-muted">Giữ <kbd>Ctrl</kbd> để chọn nhiều file cùng lúc · PDF, Word, Excel, PowerPoint · Tối đa 50MB/file</small>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Loại tài liệu <small class="fw-normal text-muted">(áp dụng cho tất cả)</small></label>
+            <select class="form-select" id="batchCat">
+              <option>Biểu mẫu</option>
+              <option>Hướng dẫn</option>
+              <option>Quy chế</option>
+              <option>Quyết định</option>
+              <option>Khác</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Phiên bản <small class="fw-normal text-muted">(tùy chọn)</small></label>
+            <input type="text" class="form-control" id="batchVersion" placeholder="VD: 2026, v1.0...">
+          </div>
+        </div>
+        <!-- Danh sách tiến trình -->
+        <div id="batchProgress" class="d-none">
+          <div class="fw-semibold mb-2" style="font-size:.9rem">Tiến trình upload:</div>
+          <div id="batchList" style="max-height:280px;overflow-y:auto"></div>
+          <div id="batchSummary" class="mt-2 fw-semibold" style="font-size:.88rem"></div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 d-flex gap-2">
+        <button class="btn btn-secondary" id="batchCancelBtn" data-bs-dismiss="modal">Hủy</button>
+        <button class="btn fw-semibold px-4" id="batchUploadBtn"
+                style="background:#e65100;color:#fff" onclick="doBatchUpload()">
+          <i class="bi bi-cloud-upload me-1"></i><span id="batchBtnTxt">Upload tất cả</span>
         </button>
       </div>
     </div>
@@ -283,6 +335,106 @@
     const { error } = await sb.from('documents').delete().eq('id', id);
     if (error) { showToast('Xóa thất bại','danger'); return; }
     showToast('Đã xóa tài liệu','success');
+    loadDocs();
+  }
+
+  // ===== BATCH UPLOAD =====
+  const batchModal = new bootstrap.Modal(document.getElementById('batchModal'));
+
+  function openBatchModal() {
+    document.getElementById('batchFiles').value = '';
+    document.getElementById('batchVersion').value = '';
+    document.getElementById('batchProgress').classList.add('d-none');
+    document.getElementById('batchList').innerHTML = '';
+    document.getElementById('batchSummary').textContent = '';
+    document.getElementById('batchBtnTxt').textContent = 'Upload tất cả';
+    document.getElementById('batchUploadBtn').disabled = false;
+    document.getElementById('batchUploadBtn').onclick = doBatchUpload;
+    document.getElementById('batchCancelBtn').disabled = false;
+    document.getElementById('batchCancelBtn').setAttribute('data-bs-dismiss','modal');
+    document.getElementById('batchCloseX').disabled = false;
+    batchModal.show();
+  }
+
+  async function doBatchUpload() {
+    const files   = document.getElementById('batchFiles').files;
+    const cat     = document.getElementById('batchCat').value;
+    const version = document.getElementById('batchVersion').value.trim();
+
+    if (!files.length) { showToast('Vui lòng chọn ít nhất 1 file', 'warning'); return; }
+
+    const items      = Array.from(files);
+    const progressEl = document.getElementById('batchProgress');
+    const listEl     = document.getElementById('batchList');
+    const summaryEl  = document.getElementById('batchSummary');
+    const btn        = document.getElementById('batchUploadBtn');
+    const cancelBtn  = document.getElementById('batchCancelBtn');
+    const closeX     = document.getElementById('batchCloseX');
+
+    // Khóa UI khi đang upload
+    btn.disabled = true;
+    cancelBtn.disabled = true;
+    cancelBtn.removeAttribute('data-bs-dismiss');
+    closeX.disabled = true;
+    document.getElementById('batchBtnTxt').textContent = `Đang upload 0/${items.length}...`;
+    progressEl.classList.remove('d-none');
+
+    listEl.innerHTML = items.map((f, i) => `
+      <div class="d-flex align-items-center gap-2 py-2 border-bottom" id="bi_${i}">
+        <i class="bi bi-hourglass text-muted flex-shrink-0" id="bico_${i}"></i>
+        <div class="flex-grow-1 text-truncate" style="font-size:.84rem" title="${escHtml(f.name)}">${escHtml(f.name)}</div>
+        <span style="font-size:.78rem;white-space:nowrap" id="bst_${i}" class="text-muted">Chờ...</span>
+      </div>`).join('');
+
+    let done = 0, failed = 0;
+
+    for (let i = 0; i < items.length; i++) {
+      const file = items[i];
+      document.getElementById(`bico_${i}`).className = 'bi bi-arrow-repeat text-warning flex-shrink-0';
+      document.getElementById(`bst_${i}`).textContent = 'Đang upload...';
+      document.getElementById('batchBtnTxt').textContent = `Đang upload ${i+1}/${items.length}...`;
+
+      try {
+        const path = `docs/${Date.now()}_${file.name.replace(/\s/g,'_')}`;
+        const { error: upErr } = await sb.storage.from('tai-lieu').upload(path, file);
+        if (upErr) throw upErr;
+
+        const { data: urlData } = sb.storage.from('tai-lieu').getPublicUrl(path);
+        const title = file.name.replace(/\.[^.]+$/, '').replace(/[_\-]+/g, ' ').trim();
+
+        const { error: dbErr } = await sb.from('documents').insert({
+          title, category: cat, version, description: '',
+          file_url: urlData.publicUrl, file_name: file.name,
+          download_count: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+        if (dbErr) throw dbErr;
+
+        document.getElementById(`bico_${i}`).className = 'bi bi-check-circle-fill text-success flex-shrink-0';
+        document.getElementById(`bst_${i}`).textContent = 'Xong ✓';
+        document.getElementById(`bst_${i}`).style.color = '#34d399';
+        done++;
+      } catch (err) {
+        document.getElementById(`bico_${i}`).className = 'bi bi-x-circle-fill text-danger flex-shrink-0';
+        document.getElementById(`bst_${i}`).textContent = 'Lỗi';
+        document.getElementById(`bst_${i}`).title = err.message;
+        document.getElementById(`bst_${i}`).style.color = '#ef4444';
+        failed++;
+      }
+    }
+
+    // Mở khóa UI sau khi xong
+    btn.disabled = false;
+    cancelBtn.disabled = false;
+    cancelBtn.setAttribute('data-bs-dismiss','modal');
+    closeX.disabled = false;
+    document.getElementById('batchBtnTxt').textContent = 'Đóng';
+    btn.onclick = () => batchModal.hide();
+
+    const color = failed ? '#fbbf24' : '#34d399';
+    summaryEl.innerHTML = `<span style="color:${color}">✓ ${done} file thành công${failed ? ` · ✗ ${failed} lỗi` : ''}</span>`;
+    showToast(`Upload xong: ${done} thành công${failed ? ', '+failed+' lỗi' : ''}`, failed ? 'warning' : 'success');
     loadDocs();
   }
 </script>
