@@ -356,6 +356,16 @@
     batchModal.show();
   }
 
+  // Chuẩn hóa tên file: bỏ dấu tiếng Việt, thay ký tự đặc biệt bằng gạch dưới
+  function sanitizePath(name) {
+    return name
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')  // bỏ dấu
+      .replace(/đ/g,'d').replace(/Đ/g,'D')               // đ/Đ không bỏ dấu được bởi NFD
+      .replace(/[^a-zA-Z0-9._-]/g, '_')                  // ký tự lạ → _
+      .replace(/_+/g, '_')                                // nhiều _ liên tiếp → 1 _
+      .replace(/^_|_$/g, '');                             // bỏ _ đầu/cuối
+  }
+
   async function doBatchUpload() {
     const files   = document.getElementById('batchFiles').files;
     const cat     = document.getElementById('batchCat').value;
@@ -371,35 +381,41 @@
     const cancelBtn  = document.getElementById('batchCancelBtn');
     const closeX     = document.getElementById('batchCloseX');
 
-    // Khóa UI khi đang upload
     btn.disabled = true;
     cancelBtn.disabled = true;
     cancelBtn.removeAttribute('data-bs-dismiss');
     closeX.disabled = true;
     document.getElementById('batchBtnTxt').textContent = `Đang upload 0/${items.length}...`;
     progressEl.classList.remove('d-none');
+    summaryEl.textContent = '';
 
     listEl.innerHTML = items.map((f, i) => `
-      <div class="d-flex align-items-center gap-2 py-2 border-bottom" id="bi_${i}">
-        <i class="bi bi-hourglass text-muted flex-shrink-0" id="bico_${i}"></i>
-        <div class="flex-grow-1 text-truncate" style="font-size:.84rem" title="${escHtml(f.name)}">${escHtml(f.name)}</div>
-        <span style="font-size:.78rem;white-space:nowrap" id="bst_${i}" class="text-muted">Chờ...</span>
+      <div class="py-2 border-bottom" id="bi_${i}">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-hourglass text-muted flex-shrink-0" id="bico_${i}"></i>
+          <div class="flex-grow-1 text-truncate" style="font-size:.84rem" title="${escHtml(f.name)}">${escHtml(f.name)}</div>
+          <span style="font-size:.78rem;white-space:nowrap" id="bst_${i}" class="text-muted">Chờ...</span>
+        </div>
+        <div id="berr_${i}" style="font-size:.75rem;color:#f87171;display:none;padding-left:1.4rem"></div>
       </div>`).join('');
 
     let done = 0, failed = 0;
 
     for (let i = 0; i < items.length; i++) {
       const file = items[i];
+      const safeFileName = sanitizePath(file.name);
+      const path = `docs/${Date.now()}_${safeFileName}`;
+
       document.getElementById(`bico_${i}`).className = 'bi bi-arrow-repeat text-warning flex-shrink-0';
       document.getElementById(`bst_${i}`).textContent = 'Đang upload...';
       document.getElementById('batchBtnTxt').textContent = `Đang upload ${i+1}/${items.length}...`;
 
       try {
-        const path = `docs/${Date.now()}_${file.name.replace(/\s/g,'_')}`;
-        const { error: upErr } = await sb.storage.from('tai-lieu').upload(path, file);
-        if (upErr) throw upErr;
+        const { error: upErr } = await sb.storage.from('tai-lieu').upload(path, file, { contentType: file.type });
+        if (upErr) throw new Error('Storage: ' + upErr.message);
 
         const { data: urlData } = sb.storage.from('tai-lieu').getPublicUrl(path);
+        // Tên hiển thị: lấy từ tên file gốc, bỏ phần mở rộng và thay _ bằng dấu cách
         const title = file.name.replace(/\.[^.]+$/, '').replace(/[_\-]+/g, ' ').trim();
 
         const { error: dbErr } = await sb.from('documents').insert({
@@ -409,7 +425,7 @@
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
-        if (dbErr) throw dbErr;
+        if (dbErr) throw new Error('Database: ' + dbErr.message);
 
         document.getElementById(`bico_${i}`).className = 'bi bi-check-circle-fill text-success flex-shrink-0';
         document.getElementById(`bst_${i}`).textContent = 'Xong ✓';
@@ -418,13 +434,14 @@
       } catch (err) {
         document.getElementById(`bico_${i}`).className = 'bi bi-x-circle-fill text-danger flex-shrink-0';
         document.getElementById(`bst_${i}`).textContent = 'Lỗi';
-        document.getElementById(`bst_${i}`).title = err.message;
-        document.getElementById(`bst_${i}`).style.color = '#ef4444';
+        document.getElementById(`bst_${i}`).style.color = '#f87171';
+        const errEl = document.getElementById(`berr_${i}`);
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
         failed++;
       }
     }
 
-    // Mở khóa UI sau khi xong
     btn.disabled = false;
     cancelBtn.disabled = false;
     cancelBtn.setAttribute('data-bs-dismiss','modal');
@@ -433,7 +450,7 @@
     btn.onclick = () => batchModal.hide();
 
     const color = failed ? '#fbbf24' : '#34d399';
-    summaryEl.innerHTML = `<span style="color:${color}">✓ ${done} file thành công${failed ? ` · ✗ ${failed} lỗi` : ''}</span>`;
+    summaryEl.innerHTML = `<span style="color:${color}">✓ ${done} file thành công${failed ? ` &nbsp;·&nbsp; ✗ ${failed} lỗi` : ''}</span>`;
     showToast(`Upload xong: ${done} thành công${failed ? ', '+failed+' lỗi' : ''}`, failed ? 'warning' : 'success');
     loadDocs();
   }
