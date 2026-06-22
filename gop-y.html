@@ -45,11 +45,48 @@
 </nav>
 
 <!-- HEADER -->
-<div style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;padding:2rem 0 3.5rem">
+<div class="page-header-band">
   <div class="container">
-    <div class="hero-badge mb-2"><i class="bi bi-chat-left-dots-fill"></i>&nbsp;Hỏi đáp & Góp ý</div>
-    <h1 class="hero-title">Gửi Góp ý &amp; Phản hồi</h1>
-    <p class="hero-sub mb-0">Gửi câu hỏi, kiến nghị đến Ban thường trực và theo dõi trạng thái phản hồi</p>
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="hero-badge mb-2"><i class="bi bi-chat-left-dots-fill"></i>&nbsp;Hỏi đáp & Góp ý</div>
+        <h1 class="hero-title">Gửi Góp ý &amp; Phản hồi</h1>
+        <p class="hero-sub mb-0">Gửi câu hỏi, kiến nghị đến Ban thường trực và theo dõi trạng thái phản hồi</p>
+      </div>
+      <div class="col-lg-4 d-none d-lg-flex justify-content-center align-items-center">
+        <div class="hero-email-wrap">
+          <div class="hero-email-frame">
+            <svg class="hero-envelope-svg" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="envBody" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stop-color="#1e2244"/>
+                  <stop offset="100%" stop-color="#0b0c1a"/>
+                </linearGradient>
+                <linearGradient id="envFlap" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stop-color="#272b4a"/>
+                  <stop offset="100%" stop-color="#181a30"/>
+                </linearGradient>
+                <linearGradient id="neonLine" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%"   stop-color="transparent"/>
+                  <stop offset="30%"  stop-color="#00d4aa"/>
+                  <stop offset="60%"  stop-color="#3b82f6"/>
+                  <stop offset="100%" stop-color="transparent"/>
+                </linearGradient>
+              </defs>
+              <rect x="2" y="10" width="96" height="68" rx="5"
+                    fill="url(#envBody)" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+              <path d="M2,10 L50,48 L98,10 Z" fill="url(#envFlap)"/>
+              <path d="M2,78 L42,48"  stroke="rgba(255,255,255,0.05)" stroke-width="0.7" fill="none"/>
+              <path d="M98,78 L58,48" stroke="rgba(255,255,255,0.05)" stroke-width="0.7" fill="none"/>
+              <line x1="18" y1="48" x2="82" y2="48" stroke="url(#neonLine)" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            <div class="hero-neon-bar"></div>
+            <div class="hero-ambient"></div>
+          </div>
+          <div class="hero-ring"></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

@@ -292,8 +292,11 @@
       showLoading(false);
       btn.disabled = false;
       document.getElementById('saveBtnTxt').textContent = 'Tạo tài khoản';
-      const msg = error.message.toLowerCase().includes('already registered')
+      const errLower = error.message.toLowerCase();
+      const msg = errLower.includes('already registered') || errLower.includes('user already registered')
         ? 'Email này đã có tài khoản trong hệ thống. Vui lòng kiểm tra lại hoặc dùng email khác.'
+        : errLower.includes('rate limit') || errLower.includes('email rate') || errLower.includes('over_email_send_rate_limit')
+        ? 'Supabase đang giới hạn gửi email xác nhận (free tier: tối đa 3 email/giờ).\n\n✅ Cách khắc phục vĩnh viễn: vào Supabase Dashboard → Authentication → Settings → tắt "Enable email confirmations".\n\nHoặc chờ ~1 giờ rồi thử lại.'
         : 'Lỗi tạo tài khoản: ' + error.message;
       showErr(errEl, msg);
       return;
