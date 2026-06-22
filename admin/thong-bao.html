@@ -230,7 +230,7 @@
               const { error } = await sb.storage.from('attachments').upload(path, file, { upsert: true });
               if (error) {
                 showLoading(false);
-                showToast('Upload ảnh thất bại: ' + error.message, 'danger');
+                showToast('Upload ảnh thất bại: ' + error.message + ' — Vui lòng kiểm tra bucket "attachments" trong Supabase Storage đã được đặt Public chưa.', 'danger');
                 return;
               }
               const { data: urlData } = sb.storage.from('attachments').getPublicUrl(path);
@@ -243,20 +243,30 @@
           }
         }
       },
-      clipboard: {
-        matchVisual: false,
-        matchers: [
-          // Chặn paste ảnh base64 trực tiếp vào editor
-          ['img', function (node, delta) {
-            const src = node.getAttribute('src') || '';
-            if (src.startsWith('data:')) {
-              showToast('Không thể dán ảnh trực tiếp. Hãy dùng nút 🖼️ để chèn URL ảnh.', 'warning');
-              return new Quill.import('delta')();
-            }
-            return delta;
-          }]
-        ]
-      }
+      clipboard: { matchVisual: false }
+    }
+  });
+
+  // ===== CHẶN PASTE ẢNH Ở TẦNG DOM (mạnh hơn clipboard matchers) =====
+  quill.root.addEventListener('paste', function (e) {
+    const items = Array.from(e.clipboardData?.items || []);
+    const hasRawImage = items.some(item => item.type.startsWith('image/'));
+    if (hasRawImage) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      showToast('Không thể dán ảnh trực tiếp — nhấn nút 🖼️ trên toolbar để upload ảnh từ máy tính.', 'warning');
+    }
+  }, true);
+
+  // ===== SAFETY NET: undo nếu base64 vẫn lọt vào =====
+  quill.on('text-change', function (delta, _old, source) {
+    if (source !== 'user') return;
+    const hasBase64 = delta.ops.some(op =>
+      typeof op.insert?.image === 'string' && op.insert.image.startsWith('data:')
+    );
+    if (hasBase64) {
+      quill.history.undo();
+      showToast('Ảnh paste bị chặn — dùng nút 🖼️ để upload từ máy tính.', 'warning');
     }
   });
 
