@@ -719,6 +719,17 @@ a.text-muted:hover { color: var(--primary) !important; }
   50%       { opacity: 1; }
 }
 
+/* ===== CONTENT IMAGES (thông báo, nội dung rich text) ===== */
+#mContent img,
+.anc-content img,
+.fb-item img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  border-radius: 8px;
+  margin: .5rem auto;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .hero-inner { padding: 2.5rem 0 4rem; }
