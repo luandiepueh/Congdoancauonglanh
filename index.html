@@ -254,16 +254,26 @@
 
 </div>
 
-<!-- DETAIL MODAL -->
+<!-- DETAIL MODAL — A4 Viewer -->
 <div class="modal fade" id="ancModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header" style="background:var(--primary);color:#fff">
-        <h5 class="modal-title" id="ancModalTitle">Chi tiết thông báo</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered a4-viewer-dialog">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:12px;overflow:hidden">
+      <div class="modal-header a4-modal-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-file-earmark-text-fill opacity-75"></i>
+          <span style="font-size:.8rem;opacity:.85;font-weight:500">Chi tiết thông báo</span>
+        </div>
+        <button class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body" id="ancModalBody" style="line-height:1.7"></div>
-      <div class="modal-footer" id="ancModalFooter" class="border-0"></div>
+      <div class="modal-body a4-modal-bg">
+        <div class="a4-page">
+          <div id="ancModalMeta"></div>
+          <h2 class="a4-doc-title" id="ancModalTitle"></h2>
+          <hr class="a4-divider">
+          <div id="ancModalContent" class="a4-content"></div>
+          <div id="ancModalAttach"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -323,7 +333,7 @@
     if (session) document.getElementById('adminNav').classList.remove('d-none');
   });
 
-  let homeAncs = [];
+  let homeAncs = [], ancCurIdx = 0;
 
   async function loadHome() {
     try {
@@ -360,25 +370,77 @@
     return tmp.textContent || tmp.innerText || '';
   }
 
+  function isImage(url) {
+    return url && /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?.*)?$/i.test(url);
+  }
+
   function renderAnc(ancs) {
     const el = document.getElementById('latestAnc');
     if (!ancs.length) {
       el.innerHTML = '<div class="empty-state"><i class="bi bi-megaphone"></i><p class="mt-2">Chưa có thông báo nào.</p></div>';
       return;
     }
-    el.innerHTML = ancs.map((a,i) => `
-      <div class="anc-card fade-up${a.is_pinned?' pinned':''}" style="animation-delay:${i*0.07}s" onclick="openAnc('${a.id}')">
-        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-          ${a.is_pinned ? '<span class="badge" style="background:var(--accent);color:#fff;font-size:.69rem"><i class="bi bi-pin-fill me-1"></i>Ghim</span>' : ''}
-          ${catBadge(a.category)}
+    ancCurIdx = 0;
+    const slides = ancs.map((a) => `
+      <div class="anc-slide${a.is_pinned?' pinned':''}" onclick="openAnc('${a.id}')">
+        <div>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            ${a.is_pinned ? '<span class="badge" style="background:var(--accent);color:#fff;font-size:.69rem"><i class="bi bi-pin-fill me-1"></i>Ghim</span>' : ''}
+            ${catBadge(a.category)}
+            <span class="anc-meta ms-auto"><i class="bi bi-clock me-1"></i>${fmtDate(a.created_at)}</span>
+          </div>
+          <div class="anc-slide-title">${escHtml(a.title)}</div>
+          <div class="anc-slide-excerpt">${escHtml(stripHtml(a.content))}</div>
         </div>
-        <div class="anc-title">${escHtml(a.title)}</div>
-        <div class="anc-excerpt">${escHtml(stripHtml(a.content))}</div>
-        <div class="anc-meta">
-          <span><i class="bi bi-clock me-1"></i>${fmtDate(a.created_at)}</span>
-          ${a.attach_url ? '<span><i class="bi bi-paperclip me-1"></i>Đính kèm</span>' : ''}
+        <div class="anc-slide-footer">
+          ${a.attach_url ? `<span class="anc-meta"><i class="bi bi-${isImage(a.attach_url)?'image':'paperclip'} me-1"></i>${isImage(a.attach_url)?'Hình đính kèm':'File đính kèm'}</span>` : '<span></span>'}
+          <span class="ms-auto" style="font-size:.82rem;color:var(--primary);font-weight:600">Xem nội dung <i class="bi bi-arrow-right-short fs-5"></i></span>
         </div>
       </div>`).join('');
+
+    const dots = ancs.map((_, i) =>
+      `<div class="anc-dot${i===0?' active':''}" onclick="goAnc(${i})"></div>`
+    ).join('');
+
+    el.innerHTML = `
+      <div class="anc-carousel-wrap fade-up">
+        <button class="anc-nav-btn" id="ancPrev" onclick="ancNav(-1)" disabled>
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="anc-carousel-viewport">
+          <div class="anc-carousel-track" id="ancTrack">${slides}</div>
+        </div>
+        <button class="anc-nav-btn" id="ancNext" onclick="ancNav(1)" ${ancs.length<=1?'disabled':''}>
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+      <div class="anc-dots" id="ancDots">${dots}</div>`;
+
+    // Touch swipe support
+    const vp = el.querySelector('.anc-carousel-viewport');
+    let tx = 0;
+    vp.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+    vp.addEventListener('touchend',   e => {
+      const dx = e.changedTouches[0].clientX - tx;
+      if (Math.abs(dx) > 40) ancNav(dx < 0 ? 1 : -1);
+    }, {passive:true});
+  }
+
+  function ancNav(dir) {
+    ancCurIdx = Math.max(0, Math.min(homeAncs.length - 1, ancCurIdx + dir));
+    updateCarousel();
+  }
+
+  function goAnc(i) { ancCurIdx = i; updateCarousel(); }
+
+  function updateCarousel() {
+    const track = document.getElementById('ancTrack');
+    if (track) track.style.transform = `translateX(-${ancCurIdx * 100}%)`;
+    document.querySelectorAll('.anc-dot').forEach((d, i) => d.classList.toggle('active', i === ancCurIdx));
+    const prev = document.getElementById('ancPrev');
+    const next = document.getElementById('ancNext');
+    if (prev) prev.disabled = ancCurIdx === 0;
+    if (next) next.disabled = ancCurIdx === homeAncs.length - 1;
   }
 
   function renderDocs(docs) {
@@ -414,17 +476,41 @@
   function openAnc(id) {
     const a = homeAncs.find(x => x.id === id);
     if (!a) return;
-    document.getElementById('ancModalTitle').textContent = a.title;
-    document.getElementById('ancModalBody').innerHTML =
-      `<div class="d-flex gap-2 mb-3 flex-wrap">
+
+    document.getElementById('ancModalMeta').innerHTML =
+      `<div class="d-flex gap-2 flex-wrap align-items-center">
         ${catBadge(a.category)}
         ${a.is_pinned ? '<span class="badge" style="background:var(--accent);color:#fff"><i class="bi bi-pin-fill me-1"></i>Ghim</span>' : ''}
         <small class="text-muted ms-auto"><i class="bi bi-clock me-1"></i>${fmtDateTime(a.created_at)}</small>
-      </div>
-      <div style="line-height:1.8">${a.content || ''}</div>`;
-    document.getElementById('ancModalFooter').innerHTML = a.attach_url
-      ? `<a href="${escHtml(a.attach_url)}" target="_blank" class="btn btn-sm btn-primary-custom"><i class="bi bi-download me-1"></i>Tải file đính kèm (${escHtml(a.attach_name||'file')})</a>`
-      : '';
+      </div>`;
+    document.getElementById('ancModalTitle').textContent = a.title;
+    document.getElementById('ancModalContent').innerHTML = a.content || '';
+
+    const attachEl = document.getElementById('ancModalAttach');
+    if (a.attach_url) {
+      if (isImage(a.attach_url)) {
+        attachEl.innerHTML =
+          `<div class="mt-3 pt-3" style="border-top:1px solid #f1f5f9">
+            <p class="text-muted mb-2" style="font-size:.8rem"><i class="bi bi-image me-1"></i>Hình đính kèm</p>
+            <img src="${escHtml(a.attach_url)}" alt="${escHtml(a.attach_name||'Hình đính kèm')}" class="a4-attach-img">
+            <div class="mt-2">
+              <a href="${escHtml(a.attach_url)}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download me-1"></i>Tải hình gốc
+              </a>
+            </div>
+          </div>`;
+      } else {
+        attachEl.innerHTML =
+          `<div class="mt-3 pt-3" style="border-top:1px solid #f1f5f9">
+            <a href="${escHtml(a.attach_url)}" target="_blank" class="btn btn-sm btn-primary-custom">
+              <i class="bi bi-download me-1"></i>Tải file đính kèm (${escHtml(a.attach_name||'file')})
+            </a>
+          </div>`;
+      }
+    } else {
+      attachEl.innerHTML = '';
+    }
+
     new bootstrap.Modal(document.getElementById('ancModal')).show();
   }
 
