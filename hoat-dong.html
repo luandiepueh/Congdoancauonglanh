@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hình ảnh hoạt động - Công Đoàn Cơ Sở</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
+<div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
+
+<div class="topbar">
+  <div class="container d-flex justify-content-between">
+    <span><i class="bi bi-building me-1"></i>Hệ thống thông tin Công Đoàn Cơ Sở</span>
+    <span id="topDate"></span>
+  </div>
+</div>
+
+<nav class="main-navbar">
+  <div class="container">
+    <div class="nav-brand-row">
+      <div class="nav-logo-box">
+        <img src="images/logo-phuong.png" class="nav-logo" alt="Logo Phường Cầu Ông Lãnh" onerror="this.style.display='none'">
+      </div>
+      <a href="index.html" class="nav-brand-center text-decoration-none">
+        <div class="brand-name" id="navOrg">Công Đoàn Cơ Sở</div>
+        <div class="brand-sub">Hệ thống thông tin nội bộ</div>
+      </a>
+      <div class="nav-logo-box">
+        <img src="images/logo-congdoan.png" class="nav-logo" alt="Logo Công đoàn Việt Nam" onerror="this.style.display='none'">
+      </div>
+    </div>
+    <ul class="navbar-nav nav-links-row">
+      <li><a href="index.html"     class="nav-link nav-pill">Trang chủ</a></li>
+      <li><a href="thong-bao.html" class="nav-link nav-pill">Thông báo</a></li>
+      <li><a href="tai-lieu.html"  class="nav-link nav-pill">Tài liệu</a></li>
+      <li><a href="hoat-dong.html" class="nav-link nav-pill active">Hoạt động</a></li>
+      <li><a href="gop-y.html"     class="nav-link nav-pill">Góp ý</a></li>
+      <li id="adminNav" class="d-none">
+        <a href="admin/index.html" class="nav-link nav-pill admin-link"><i class="bi bi-shield-lock me-1"></i>Quản trị</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<div class="page-header-band" id="main">
+  <div class="container">
+    <div class="hero-badge mb-2"><i class="bi bi-images"></i>&nbsp;Thư viện ảnh</div>
+    <h1 class="hero-title">Hình ảnh hoạt động</h1>
+    <p class="hero-sub mb-0">Hình ảnh phong trào, hoạt động và sự kiện của Công đoàn cơ sở</p>
+  </div>
+</div>
+
+<div class="container py-4" style="margin-top:-2rem;position:relative;z-index:5">
+
+  <!-- SEARCH -->
+  <div class="app-card mb-4">
+    <div class="card-body p-3">
+      <div class="input-group" style="max-width:340px">
+        <span class="input-group-text" style="border-radius:8px 0 0 8px;border:1.5px solid #ddd"><i class="bi bi-search text-muted"></i></span>
+        <label class="visually-hidden" for="searchBox">Tìm hoạt động theo tiêu đề</label>
+        <input type="text" class="form-control" id="searchBox" placeholder="Tìm theo tiêu đề..." oninput="applyFilter()" style="border-radius:0 8px 8px 0;border:1.5px solid #ddd;border-left:none">
+      </div>
+    </div>
+  </div>
+
+  <!-- TOTAL -->
+  <div class="text-muted mb-3" style="font-size:.85rem"><span id="actCount">0</span> hoạt động</div>
+
+  <!-- GALLERY -->
+  <div id="actList" class="row g-3">
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-danger" style="width:2.5rem;height:2.5rem"></div>
+      <p class="mt-3 text-muted">Đang tải hình ảnh...</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- LIGHTBOX MODAL -->
+<div class="modal fade" id="actModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered a4-viewer-dialog">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:12px;overflow:hidden">
+      <div class="modal-header a4-modal-header">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-image-fill opacity-75"></i>
+          <span style="font-size:.8rem;opacity:.85;font-weight:500">Chi tiết hoạt động</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body a4-modal-bg">
+        <div class="a4-page">
+          <img id="actModalImg" src="" alt="" class="gallery-lightbox-img mb-3">
+          <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+            <small class="text-muted"><i class="bi bi-calendar3 me-1"></i><span id="actModalDate"></span></small>
+          </div>
+          <h2 class="a4-doc-title" id="actModalTitle" style="font-size:1.2rem"></h2>
+          <div id="actModalDesc" class="a4-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer py-4 mt-5">
+  <div class="container text-center" style="font-size:.82rem;color:#999">
+    <a href="index.html" class="text-muted text-decoration-none me-3"><i class="bi bi-house me-1"></i>Trang chủ</a>
+    <a href="thong-bao.html" class="text-muted text-decoration-none me-3"><i class="bi bi-megaphone me-1"></i>Thông báo</a>
+    <a href="tai-lieu.html" class="text-muted text-decoration-none me-3"><i class="bi bi-folder2-open me-1"></i>Tài liệu</a>
+    <a href="gop-y.html" class="text-muted text-decoration-none"><i class="bi bi-chat-dots me-1"></i>Góp ý</a>
+    <hr style="border-color:#f0d0d0">
+    © 2026 Công Đoàn Cơ Sở.
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script>
+  document.getElementById('topDate').textContent = new Date().toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+  document.getElementById('navOrg').textContent = APP_CONFIG.orgName;
+  sb.auth.getSession().then(({data:{session}}) => { if(session) document.getElementById('adminNav').classList.remove('d-none'); });
+
+  let allActs = [];
+
+  async function loadActs() {
+    const { data, error } = await sb.from('activities').select('*').order('event_date', { ascending: false });
+    if (error) {
+      document.getElementById('actList').innerHTML = '<div class="col-12 empty-state"><i class="bi bi-exclamation-triangle"></i><p class="mt-2 text-danger">Không thể tải dữ liệu.</p></div>';
+      return;
+    }
+    allActs = data || [];
+    applyFilter();
+  }
+
+  function applyFilter() {
+    const q = document.getElementById('searchBox').value.toLowerCase();
+    const list = allActs.filter(a => !q || a.title.toLowerCase().includes(q));
+    document.getElementById('actCount').textContent = list.length;
+    render(list);
+  }
+
+  function render(acts) {
+    const el = document.getElementById('actList');
+    if (!acts.length) {
+      el.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-images"></i><p class="mt-2">Chưa có hình ảnh hoạt động nào. Ban thường trực sẽ cập nhật sớm.</p></div>';
+      return;
+    }
+    el.innerHTML = acts.map((a,i) => `
+      <div class="col-6 col-md-4 col-lg-3 fade-up" style="animation-delay:${i*0.04}s">
+        <button type="button" class="gallery-card" onclick="openAct('${a.id}')" aria-label="Xem hoạt động: ${escHtml(a.title)}">
+          <img class="gallery-thumb" src="${escHtml(a.image_url)}" alt="" loading="lazy">
+          <div class="gallery-body">
+            <div class="gallery-title">${escHtml(a.title)}</div>
+            <div class="gallery-date"><i class="bi bi-calendar3"></i>${fmtDate(a.event_date)}</div>
+          </div>
+        </button>
+      </div>`).join('');
+  }
+
+  function openAct(id) {
+    const a = allActs.find(x => x.id === id);
+    if (!a) return;
+    document.getElementById('actModalImg').src = a.image_url;
+    document.getElementById('actModalImg').alt = a.title;
+    document.getElementById('actModalTitle').textContent = a.title;
+    document.getElementById('actModalDate').textContent = fmtDate(a.event_date);
+    document.getElementById('actModalDesc').textContent = a.description || '';
+    new bootstrap.Modal(document.getElementById('actModal')).show();
+  }
+
+  loadActs();
+</script>
+</body>
+</html>

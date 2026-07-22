@@ -25,18 +25,18 @@
   <div id="errMsg" class="alert alert-danger d-none" style="border-radius:10px;font-size:.88rem"></div>
 
   <div class="mb-3">
-    <label class="form-label fw-semibold">Email</label>
+    <label class="form-label fw-semibold" for="email">Email</label>
     <div class="input-group">
       <span class="input-group-text" style="border-radius:8px 0 0 8px"><i class="bi bi-envelope text-muted"></i></span>
       <input type="email" class="form-control" id="email" placeholder="admin@email.com" style="border-radius:0 8px 8px 0">
     </div>
   </div>
   <div class="mb-4">
-    <label class="form-label fw-semibold">Mật khẩu</label>
+    <label class="form-label fw-semibold" for="password">Mật khẩu</label>
     <div class="input-group">
       <span class="input-group-text" style="border-radius:8px 0 0 8px"><i class="bi bi-lock text-muted"></i></span>
       <input type="password" class="form-control" id="password" placeholder="••••••••" style="border-radius:0 8px 8px 0" onkeypress="if(event.key==='Enter')doLogin()">
-      <button class="btn btn-outline-secondary" type="button" style="border-radius:0 8px 8px 0" onclick="togglePwd()"><i class="bi bi-eye" id="eyeIcon"></i></button>
+      <button class="btn btn-outline-secondary" type="button" style="border-radius:0 8px 8px 0" onclick="togglePwd()" aria-label="Hiện mật khẩu"><i class="bi bi-eye" id="eyeIcon"></i></button>
     </div>
   </div>
 
@@ -65,8 +65,9 @@
   function togglePwd() {
     const inp = document.getElementById('password');
     const ico = document.getElementById('eyeIcon');
-    if (inp.type === 'password') { inp.type = 'text'; ico.className = 'bi bi-eye-slash'; }
-    else { inp.type = 'password'; ico.className = 'bi bi-eye'; }
+    const btn = ico.closest('button');
+    if (inp.type === 'password') { inp.type = 'text'; ico.className = 'bi bi-eye-slash'; btn.setAttribute('aria-label', 'Ẩn mật khẩu'); }
+    else { inp.type = 'password'; ico.className = 'bi bi-eye'; btn.setAttribute('aria-label', 'Hiện mật khẩu'); }
   }
 
   async function doLogin() {

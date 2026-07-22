@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Hoạt động - Công Đoàn</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
+<div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
+
+<div class="admin-layout">
+  <div class="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <div class="d-flex align-items-center gap-2">
+        <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem"><i class="bi bi-people-fill text-warning"></i></div>
+        <div><div class="s-title" id="sbOrg">Công Đoàn Cơ Sở</div><div class="s-sub">Ban Thường Trực</div></div>
+      </div>
+    </div>
+    <nav class="admin-nav">
+      <div class="nav-section-label">Tổng quan</div>
+      <a href="index.html"     class="admin-nav-link"><i class="bi bi-speedometer2"></i>Dashboard</a>
+      <div class="nav-section-label">Quản lý nội dung</div>
+      <a href="thong-bao.html" class="admin-nav-link"><i class="bi bi-megaphone-fill"></i>Thông báo</a>
+      <a href="tai-lieu.html"  class="admin-nav-link"><i class="bi bi-folder2-open"></i>Tài liệu</a>
+      <a href="hoat-dong.html" class="admin-nav-link active"><i class="bi bi-images"></i>Hoạt động</a>
+      <a href="gop-y.html"     class="admin-nav-link"><i class="bi bi-chat-left-dots-fill"></i>Góp ý</a>
+      <div class="nav-section-label">Hệ thống</div>
+      <a href="quan-tri-vien.html" class="admin-nav-link"><i class="bi bi-person-gear"></i>Quản trị viên</a>
+      <a href="../index.html"  class="admin-nav-link" target="_blank"><i class="bi bi-box-arrow-up-right"></i>Xem trang công khai</a>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="admin-nav-link w-100 border-0 bg-transparent text-start" onclick="adminLogout()" style="color:rgba(255,255,255,.6)"><i class="bi bi-box-arrow-left"></i>Đăng xuất</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main" id="main">
+    <div class="admin-topbar">
+      <button type="button" class="admin-sidebar-toggle" onclick="toggleAdminSidebar()" aria-label="Mở/đóng menu điều hướng"><i class="bi bi-list"></i></button>
+      <div><div class="page-title">Quản lý Hoạt động</div><div class="page-sub">Đăng hình ảnh hoạt động, phong trào của công đoàn</div></div>
+      <button class="btn btn-primary-custom fw-semibold" onclick="openModal()"><i class="bi bi-image-fill me-1"></i>Thêm hoạt động</button>
+    </div>
+
+    <div class="admin-content">
+      <!-- SEARCH -->
+      <div class="app-card mb-4">
+        <div class="card-body p-3 d-flex gap-2 flex-wrap align-items-center">
+          <div class="input-group input-group-sm" style="max-width:280px">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <label class="visually-hidden" for="searchBox">Tìm hoạt động theo tiêu đề</label>
+            <input type="text" class="form-control" id="searchBox" placeholder="Tìm theo tiêu đề..." oninput="renderFiltered()">
+          </div>
+          <span class="ms-auto text-muted" style="font-size:.83rem"><span id="actCount">0</span> hoạt động</span>
+        </div>
+      </div>
+
+      <!-- GALLERY GRID -->
+      <div class="row g-3" id="actGrid">
+        <div class="col-12 text-center py-4"><div class="spinner-border spinner-border-sm text-danger"></div></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL THÊM/SỬA -->
+<div class="modal fade" id="actModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header" style="background:var(--primary);color:#fff">
+        <h5 class="modal-title" id="modalTitle">Thêm hoạt động mới</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+        <div class="mb-3">
+          <label class="form-label" for="fTitle">Tiêu đề <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="fTitle" placeholder="VD: Hội thao chào mừng ngày thành lập Công đoàn">
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label" for="fDate">Ngày diễn ra</label>
+            <input type="date" class="form-control" id="fDate">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="fDesc">Mô tả ngắn</label>
+          <textarea class="form-control" id="fDesc" rows="3" placeholder="Mô tả ngắn về hoạt động..." style="resize:vertical"></textarea>
+        </div>
+        <div class="mb-1">
+          <label class="form-label" for="fImage">Hình ảnh <span class="text-danger">*</span></label>
+          <input type="file" class="form-control" id="fImage" accept="image/png,image/jpeg,image/webp,image/gif">
+          <small class="text-muted">JPG, PNG, WebP — tối đa 10MB. Để trống nếu chỉ sửa thông tin.</small>
+          <div id="currentImgWrap" class="mt-2 d-none">
+            <img id="currentImgPreview" src="" alt="Hình hiện tại" style="max-width:160px;border-radius:8px;border:1px solid var(--glass-border)">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button class="btn btn-danger fw-semibold px-4" onclick="saveActivity()">
+          <i class="bi bi-save me-1"></i><span id="saveBtnTxt">Thêm hoạt động</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/config.js"></script>
+<script>
+  let allActs = [];
+  const modal = new bootstrap.Modal(document.getElementById('actModal'));
+
+  (async () => {
+    const session = await requireAdmin('login.html');
+    if (!session) return;
+    document.getElementById('sbOrg').textContent = APP_CONFIG.orgName;
+    loadActs();
+  })();
+
+  async function loadActs() {
+    const { data } = await sb.from('activities').select('*').order('event_date', { ascending: false });
+    allActs = data || [];
+    renderFiltered();
+  }
+
+  function renderFiltered() {
+    const s = document.getElementById('searchBox').value.toLowerCase();
+    const list = allActs.filter(a => !s || a.title.toLowerCase().includes(s));
+    document.getElementById('actCount').textContent = list.length;
+    const grid = document.getElementById('actGrid');
+    if (!list.length) {
+      grid.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-images"></i><p class="mt-2">Chưa có hoạt động nào. Bấm "Thêm hoạt động" để đăng ảnh đầu tiên.</p></div>';
+      return;
+    }
+    grid.innerHTML = list.map(a => `
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="gallery-card gallery-card-admin">
+          <div class="gallery-actions">
+            <button type="button" class="btn btn-sm btn-light" onclick="editActivity('${a.id}')" aria-label="Sửa hoạt động"><i class="bi bi-pencil"></i></button>
+            <button type="button" class="btn btn-sm btn-light text-danger" onclick="delActivity('${a.id}')" aria-label="Xóa hoạt động"><i class="bi bi-trash"></i></button>
+          </div>
+          <img class="gallery-thumb" src="${escHtml(a.image_url)}" alt="">
+          <div class="gallery-body">
+            <div class="gallery-title">${escHtml(a.title)}</div>
+            <div class="gallery-date"><i class="bi bi-calendar3"></i>${fmtDate(a.event_date)}</div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  function openModal(a = null) {
+    document.getElementById('editId').value = a?.id || '';
+    document.getElementById('fTitle').value  = a?.title || '';
+    document.getElementById('fDate').value   = a?.event_date || new Date().toISOString().slice(0,10);
+    document.getElementById('fDesc').value   = a?.description || '';
+    document.getElementById('fImage').value  = '';
+    const imgWrap = document.getElementById('currentImgWrap');
+    if (a?.image_url) {
+      document.getElementById('currentImgPreview').src = a.image_url;
+      imgWrap.classList.remove('d-none');
+    } else {
+      imgWrap.classList.add('d-none');
+    }
+    document.getElementById('modalTitle').textContent = a ? 'Chỉnh sửa hoạt động' : 'Thêm hoạt động mới';
+    document.getElementById('saveBtnTxt').textContent = a ? 'Lưu thay đổi' : 'Thêm hoạt động';
+    modal.show();
+  }
+
+  function editActivity(id) { openModal(allActs.find(a => a.id === id)); }
+
+  function sanitizePath(name) {
+    return name
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/đ/g,'d').replace(/Đ/g,'D')
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
+  }
+
+  async function saveActivity() {
+    const title   = document.getElementById('fTitle').value.trim();
+    const date    = document.getElementById('fDate').value || null;
+    const desc    = document.getElementById('fDesc').value.trim();
+    const file    = document.getElementById('fImage').files[0];
+    const editId  = document.getElementById('editId').value;
+    const existing = editId ? allActs.find(a => a.id === editId) : null;
+
+    if (!title) { showToast('Vui lòng nhập tiêu đề','danger'); return; }
+    if (!editId && !file) { showToast('Vui lòng chọn hình ảnh','danger'); return; }
+
+    showLoading(true);
+    let image_url = existing?.image_url || '';
+
+    if (file) {
+      const path = `activities/${Date.now()}_${sanitizePath(file.name)}`;
+      const { error: upErr } = await sb.storage.from('attachments').upload(path, file, { contentType: file.type });
+      if (upErr) { showLoading(false); showToast('Upload ảnh thất bại: '+upErr.message,'danger'); return; }
+      const { data: urlData } = sb.storage.from('attachments').getPublicUrl(path);
+      image_url = urlData.publicUrl;
+    }
+
+    const payload = { title, description: desc, image_url, event_date: date };
+    let error;
+    if (editId) {
+      ({ error } = await sb.from('activities').update(payload).eq('id', editId));
+    } else {
+      ({ error } = await sb.from('activities').insert({ ...payload, created_at: new Date().toISOString() }));
+    }
+    showLoading(false);
+    if (error) { showToast('Lỗi: '+error.message,'danger'); return; }
+    showToast(editId ? 'Đã cập nhật hoạt động!' : 'Đã thêm hoạt động mới!','success');
+    modal.hide();
+    loadActs();
+  }
+
+  async function delActivity(id) {
+    const a = allActs.find(x => x.id === id);
+    if (!confirm(`Xóa hoạt động "${a?.title}"?`)) return;
+    const { error } = await sb.from('activities').delete().eq('id', id);
+    if (error) { showToast('Xóa thất bại','danger'); return; }
+    showToast('Đã xóa hoạt động','success');
+    loadActs();
+  }
+</script>
+</body>
+</html>

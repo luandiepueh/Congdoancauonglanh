@@ -9,9 +9,11 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
 <div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
 
 <div class="admin-layout">
+  <div class="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
 
   <!-- SIDEBAR -->
   <aside class="admin-sidebar">
@@ -32,6 +34,7 @@
       <div class="nav-section-label">Quản lý nội dung</div>
       <a href="thong-bao.html" class="admin-nav-link"><i class="bi bi-megaphone-fill"></i>Thông báo</a>
       <a href="tai-lieu.html"  class="admin-nav-link"><i class="bi bi-folder2-open"></i>Tài liệu</a>
+      <a href="hoat-dong.html" class="admin-nav-link"><i class="bi bi-images"></i>Hoạt động</a>
       <a href="gop-y.html"     class="admin-nav-link"><i class="bi bi-chat-left-dots-fill"></i>Góp ý <span id="sbBadge" class="badge bg-danger ms-auto d-none"></span></a>
       <div class="nav-section-label">Hệ thống</div>
       <a href="quan-tri-vien.html" class="admin-nav-link"><i class="bi bi-person-gear"></i>Quản trị viên</a>
@@ -45,8 +48,9 @@
   </aside>
 
   <!-- MAIN -->
-  <main class="admin-main">
+  <main class="admin-main" id="main">
     <div class="admin-topbar">
+      <button type="button" class="admin-sidebar-toggle" onclick="toggleAdminSidebar()" aria-label="Mở/đóng menu điều hướng"><i class="bi bi-list"></i></button>
       <div>
         <div class="page-title">Dashboard</div>
         <div class="page-sub">Tổng quan hệ thống Công Đoàn Cơ Sở</div>

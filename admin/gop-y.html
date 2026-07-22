@@ -9,9 +9,11 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
 <div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
 
 <div class="admin-layout">
+  <div class="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
   <!-- SIDEBAR -->
   <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -26,6 +28,7 @@
       <div class="nav-section-label">Quản lý nội dung</div>
       <a href="thong-bao.html" class="admin-nav-link"><i class="bi bi-megaphone-fill"></i>Thông báo</a>
       <a href="tai-lieu.html"  class="admin-nav-link"><i class="bi bi-folder2-open"></i>Tài liệu</a>
+      <a href="hoat-dong.html" class="admin-nav-link"><i class="bi bi-images"></i>Hoạt động</a>
       <a href="gop-y.html"     class="admin-nav-link active"><i class="bi bi-chat-left-dots-fill"></i>Góp ý</a>
       <div class="nav-section-label">Hệ thống</div>
       <a href="quan-tri-vien.html" class="admin-nav-link"><i class="bi bi-person-gear"></i>Quản trị viên</a>
@@ -37,8 +40,9 @@
   </aside>
 
   <!-- MAIN -->
-  <main class="admin-main">
+  <main class="admin-main" id="main">
     <div class="admin-topbar">
+      <button type="button" class="admin-sidebar-toggle" onclick="toggleAdminSidebar()" aria-label="Mở/đóng menu điều hướng"><i class="bi bi-list"></i></button>
       <div>
         <div class="page-title">Quản lý Góp ý</div>
         <div class="page-sub">Tiếp nhận và phản hồi góp ý từ đoàn viên</div>
@@ -79,7 +83,7 @@
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header" style="background:var(--success,#2e7d32);color:#fff">
         <h5 class="modal-title"><i class="bi bi-reply-fill me-2"></i>Phản hồi góp ý</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3 p-3" style="background:#fff5f5;border-left:4px solid var(--primary,#b71c1c);border-radius:4px">
@@ -89,7 +93,7 @@
         </div>
         <input type="hidden" id="replyId">
         <div class="mb-1">
-          <label class="form-label">Nội dung phản hồi <span class="text-danger">*</span></label>
+          <label class="form-label" for="replyContent">Nội dung phản hồi <span class="text-danger">*</span></label>
           <textarea class="form-control" id="replyContent" rows="5" placeholder="Nhập nội dung phản hồi..." style="resize:vertical"></textarea>
         </div>
       </div>

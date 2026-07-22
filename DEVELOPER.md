@@ -5,7 +5,7 @@
 - **Backend/DB:** Supabase (PostgreSQL + Auth + Storage)
 - **Hosting:** Cloudflare Pages (static site, auto-deploy từ GitHub)
 - **Repo GitHub:** https://github.com/luandiepueh/Congdoancauonglanh
-- **URL live:** https://congdoanp.pages.dev
+- **URL live:** https://congdoancauonglanh.pages.dev
 
 ## Cấu trúc thư mục
 ```
@@ -13,12 +13,14 @@ congdoan-supabase/
 ├── index.html              # Trang chủ công khai
 ├── thong-bao.html          # Trang thông báo công khai
 ├── tai-lieu.html           # Trang tài liệu công khai
+├── hoat-dong.html          # Thư viện ảnh hoạt động công khai
 ├── gop-y.html              # Form góp ý công khai
 ├── admin/
 │   ├── login.html          # Đăng nhập admin
 │   ├── index.html          # Dashboard admin
 │   ├── thong-bao.html      # Quản lý thông báo (Quill editor)
 │   ├── tai-lieu.html       # Quản lý tài liệu
+│   ├── hoat-dong.html      # Quản lý hình ảnh hoạt động
 │   ├── gop-y.html          # Quản lý + phản hồi góp ý
 │   └── quan-tri-vien.html  # Quản lý tài khoản admin
 ├── js/
@@ -27,14 +29,15 @@ congdoan-supabase/
 │   └── style.css           # CSS toàn app
 ├── _headers                # Security headers cho Cloudflare Pages
 ├── setup.sql               # Schema gốc (đã chạy 1 lần)
-└── setup_admin_profiles.sql # Thêm bảng admin_profiles (đã chạy)
+├── setup_admin_profiles.sql # Thêm bảng admin_profiles (đã chạy)
+└── setup_activities.sql    # Thêm bảng activities cho ảnh hoạt động (chạy 1 lần khi triển khai)
 ```
 
 ## Supabase
 - **Project URL:** https://adcqrxupqlluqyffsykw.supabase.co
 - **Config:** `js/config.js` — chứa SUPABASE_URL, SUPABASE_ANON_KEY, APP_CONFIG
-- **Tables:** `announcements`, `documents`, `feedback`, `admin_profiles`
-- **Storage buckets:** `tai-lieu` (50MB, Office/PDF), `attachments` (10MB, mọi loại)
+- **Tables:** `announcements`, `documents`, `feedback`, `admin_profiles`, `activities`
+- **Storage buckets:** `tai-lieu` (50MB, Office/PDF), `attachments` (10MB, mọi loại — cũng dùng cho ảnh hoạt động, path `activities/...`)
 - **Auth:** Email + Password. Mọi `authenticated` user đều có quyền ghi.
 
 ### Bảng admin_profiles
@@ -66,14 +69,14 @@ git add .
 git commit -m "mô tả thay đổi"
 git push
 ```
-Cloudflare Pages tự deploy trong ~30–60 giây. Kiểm tra tại https://congdoanp.pages.dev.
+Cloudflare Pages tự deploy trong ~30–60 giây. Kiểm tra tại https://congdoancauonglanh.pages.dev.
 
 ## Cloudflare Pages
 - Project kết nối với GitHub repo `luandiepueh/Congdoancauonglanh`, branch `main`
 - Build command: *(để trống — không cần build)*
 - Build output directory: `/` (root)
 - File `_headers` khai báo security headers (X-Frame-Options, Cache-Control admin, v.v.)
-- Để đổi domain: Cloudflare Dashboard → Pages → congdoanp → Custom domains
+- Để đổi domain: Cloudflare Dashboard → Pages → congdoancauonglanh → Custom domains
 
 ## Phân quyền vai trò
 | Vai trò | Quyền |

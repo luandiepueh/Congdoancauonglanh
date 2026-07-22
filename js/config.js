@@ -44,6 +44,8 @@ function showToast(msg, type = 'success') {
   let box = document.getElementById('toastBox');
   if (!box) {
     box = Object.assign(document.createElement('div'), { id:'toastBox' });
+    box.setAttribute('role', 'status');
+    box.setAttribute('aria-live', 'polite');
     box.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none';
     document.body.appendChild(box);
   }
@@ -57,11 +59,21 @@ function showLoading(show) {
   let ov = document.getElementById('loadingOv');
   if (show && !ov) {
     ov = Object.assign(document.createElement('div'), { id:'loadingOv', className:'loading-overlay' });
+    ov.setAttribute('role', 'alert');
+    ov.setAttribute('aria-live', 'assertive');
     ov.innerHTML = '<div class="spinner-border text-light" style="width:3rem;height:3rem"></div><p class="text-white mt-3 mb-0">Đang xử lý...</p>';
     document.body.appendChild(ov);
   } else if (!show && ov) {
     ov.remove();
   }
+}
+
+function toggleAdminSidebar() {
+  const sb = document.querySelector('.admin-sidebar');
+  const bd = document.querySelector('.admin-sidebar-backdrop');
+  if (!sb) return;
+  const open = sb.classList.toggle('open');
+  if (bd) bd.classList.toggle('open', open);
 }
 
 async function getAdminSession() {

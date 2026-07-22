@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
 <div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
 
 <div class="topbar">
@@ -36,6 +37,7 @@
       <li><a href="index.html"     class="nav-link nav-pill">Trang chủ</a></li>
       <li><a href="thong-bao.html" class="nav-link nav-pill active">Thông báo</a></li>
       <li><a href="tai-lieu.html"  class="nav-link nav-pill">Tài liệu</a></li>
+      <li><a href="hoat-dong.html" class="nav-link nav-pill">Hoạt động</a></li>
       <li><a href="gop-y.html"     class="nav-link nav-pill">Góp ý</a></li>
       <li id="adminNav" class="d-none">
         <a href="admin/index.html" class="nav-link nav-pill admin-link"><i class="bi bi-shield-lock me-1"></i>Quản trị</a>
@@ -45,7 +47,7 @@
 </nav>
 
 <!-- PAGE HEADER -->
-<div class="page-header-band">
+<div class="page-header-band" id="main">
   <div class="container">
     <div class="hero-badge mb-2"><i class="bi bi-megaphone-fill"></i>&nbsp;Thông báo</div>
     <h1 class="hero-title">Thông báo &amp; Kế hoạch</h1>
@@ -103,7 +105,7 @@
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header" style="background:var(--primary);color:#fff">
         <h5 class="modal-title" id="mTitle">Chi tiết thông báo</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
       </div>
       <div class="modal-body">
         <div id="mMeta" class="mb-3"></div>
@@ -119,6 +121,7 @@
   <div class="container text-center" style="font-size:.82rem;color:#999">
     <a href="index.html" class="text-muted text-decoration-none me-3"><i class="bi bi-house me-1"></i>Trang chủ</a>
     <a href="tai-lieu.html" class="text-muted text-decoration-none me-3"><i class="bi bi-folder2-open me-1"></i>Tài liệu</a>
+    <a href="hoat-dong.html" class="text-muted text-decoration-none me-3"><i class="bi bi-images me-1"></i>Hoạt động</a>
     <a href="gop-y.html" class="text-muted text-decoration-none"><i class="bi bi-chat-dots me-1"></i>Góp ý</a>
     <hr style="border-color:#f0d0d0">
     © 2026 Công Đoàn Cơ Sở.
@@ -193,7 +196,7 @@
   }
 
   function ancCard(a) {
-    return `<div class="anc-card${a.is_pinned?' pinned':''}" onclick="openAnc('${a.id}')">
+    return `<button type="button" class="anc-card${a.is_pinned?' pinned':''}" onclick="openAnc('${a.id}')" aria-label="Xem thông báo: ${escHtml(a.title)}">
       <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
         ${a.is_pinned ? '<span class="badge" style="background:var(--accent);color:#fff;font-size:.69rem"><i class="bi bi-pin-fill me-1"></i>Ghim</span>' : ''}
         ${catBadge(a.category)}
@@ -205,7 +208,7 @@
         ${a.attach_url ? '<span><i class="bi bi-paperclip me-1"></i>Đính kèm</span>' : ''}
         <span class="ms-auto text-primary" style="font-size:.78rem">Xem chi tiết <i class="bi bi-arrow-right"></i></span>
       </div>
-    </div>`;
+    </button>`;
   }
 
   function renderPager(total) {

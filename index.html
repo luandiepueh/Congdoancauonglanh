@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
 <div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
 
 <!-- TOPBAR -->
@@ -38,6 +39,7 @@
       <li><a href="index.html"      class="nav-link nav-pill active">Trang chủ</a></li>
       <li><a href="thong-bao.html"  class="nav-link nav-pill">Thông báo</a></li>
       <li><a href="tai-lieu.html"   class="nav-link nav-pill">Tài liệu</a></li>
+      <li><a href="hoat-dong.html"  class="nav-link nav-pill">Hoạt động</a></li>
       <li><a href="gop-y.html"      class="nav-link nav-pill">Góp ý</a></li>
       <li id="adminNav" class="d-none">
         <a href="admin/index.html"  class="nav-link nav-pill admin-link"><i class="bi bi-shield-lock me-1"></i>Quản trị</a>
@@ -47,7 +49,7 @@
 </nav>
 
 <!-- HERO -->
-<section class="hero">
+<section class="hero" id="main">
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-8">
@@ -194,6 +196,15 @@
     <div class="col-12 text-center py-4"><div class="spinner-border text-danger" style="width:2.5rem;height:2.5rem"></div></div>
   </div>
 
+  <!-- ACTIVITIES GALLERY -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="section-title mb-0">Hình ảnh hoạt động</h2>
+    <a href="hoat-dong.html" class="btn btn-sm btn-outline-danger">Xem tất cả <i class="bi bi-arrow-right ms-1"></i></a>
+  </div>
+  <div id="featActs" class="row g-3 mb-5">
+    <div class="col-12 text-center py-4"><div class="spinner-border text-danger" style="width:2.5rem;height:2.5rem"></div></div>
+  </div>
+
   <!-- HOW IT WORKS -->
   <div class="row g-4 mb-4">
     <div class="col-md-6">
@@ -240,11 +251,17 @@
               </div>
               <div><div class="fw-semibold">Quản lý tài liệu</div><small class="text-muted">Thêm, cập nhật hoặc xóa tài liệu — hỗ trợ upload file hoặc dán link</small></div>
             </div>
-            <div class="list-group-item d-flex gap-3 py-3 border-0">
+            <div class="list-group-item d-flex gap-3 py-3">
               <div class="step-icon-circle" style="background:rgba(251,146,60,.14);color:#fb923c;box-shadow:0 0 14px rgba(251,146,60,.22)">
                 <i class="bi bi-reply-all-fill"></i>
               </div>
               <div><div class="fw-semibold">Phản hồi góp ý</div><small class="text-muted">Xem danh sách câu hỏi chờ xử lý và trả lời trực tiếp trên hệ thống</small></div>
+            </div>
+            <div class="list-group-item d-flex gap-3 py-3 border-0">
+              <div class="step-icon-circle" style="background:rgba(236,72,153,.14);color:#ec4899;box-shadow:0 0 14px rgba(236,72,153,.22)">
+                <i class="bi bi-images"></i>
+              </div>
+              <div><div class="fw-semibold">Đăng hình ảnh hoạt động</div><small class="text-muted">Vào mục <strong>Hoạt động</strong> để đăng ảnh phong trào, sự kiện của công đoàn</small></div>
             </div>
           </div>
         </div>
@@ -263,7 +280,7 @@
           <i class="bi bi-file-earmark-text-fill opacity-75"></i>
           <span style="font-size:.8rem;opacity:.85;font-weight:500">Chi tiết thông báo</span>
         </div>
-        <button class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Đóng"></button>
       </div>
       <div class="modal-body a4-modal-bg">
         <div class="a4-page">
@@ -297,6 +314,7 @@
         <ul style="list-style:none;padding:0;font-size:.85rem">
           <li class="mb-1"><a href="thong-bao.html" class="text-muted text-decoration-none"><i class="bi bi-megaphone me-1 text-danger"></i>Thông báo</a></li>
           <li class="mb-1"><a href="tai-lieu.html"  class="text-muted text-decoration-none"><i class="bi bi-folder2-open me-1 text-danger"></i>Tài liệu & Biểu mẫu</a></li>
+          <li class="mb-1"><a href="hoat-dong.html" class="text-muted text-decoration-none"><i class="bi bi-images me-1 text-danger"></i>Hình ảnh hoạt động</a></li>
           <li class="mb-1"><a href="gop-y.html"     class="text-muted text-decoration-none"><i class="bi bi-chat-dots me-1 text-danger"></i>Góp ý & Phản hồi</a></li>
           <li class="mb-1"><a href="admin/login.html" class="text-muted text-decoration-none"><i class="bi bi-shield-lock me-1 text-danger"></i>Đăng nhập Quản trị</a></li>
         </ul>
@@ -361,7 +379,28 @@
 
       const { data: docs } = await sb.from('documents').select('*').order('created_at',{ascending:false}).limit(3);
       renderDocs(docs || []);
+
+      const { data: acts } = await sb.from('activities').select('*').order('event_date',{ascending:false}).limit(4);
+      renderActs(acts || []);
     } catch(e) { console.error(e); }
+  }
+
+  function renderActs(acts) {
+    const el = document.getElementById('featActs');
+    if (!acts.length) {
+      el.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-images"></i><p class="mt-2">Chưa có hình ảnh hoạt động nào. Ban thường trực sẽ cập nhật sớm.</p></div>';
+      return;
+    }
+    el.innerHTML = acts.map((a,i) => `
+      <div class="col-6 col-md-3 fade-up" style="animation-delay:${i*0.05}s">
+        <a href="hoat-dong.html" class="gallery-card">
+          <img class="gallery-thumb" src="${escHtml(a.image_url)}" alt="" loading="lazy">
+          <div class="gallery-body">
+            <div class="gallery-title">${escHtml(a.title)}</div>
+            <div class="gallery-date"><i class="bi bi-calendar3"></i>${fmtDate(a.event_date)}</div>
+          </div>
+        </a>
+      </div>`).join('');
   }
 
   function stripHtml(html) {
@@ -382,7 +421,7 @@
     }
     ancCurIdx = 0;
     const slides = ancs.map((a) => `
-      <div class="anc-slide${a.is_pinned?' pinned':''}" onclick="openAnc('${a.id}')">
+      <button type="button" class="anc-slide${a.is_pinned?' pinned':''}" onclick="openAnc('${a.id}')" aria-label="Xem thông báo: ${escHtml(a.title)}">
         <div>
           <div class="d-flex align-items-center gap-2 flex-wrap">
             ${a.is_pinned ? '<span class="badge" style="background:var(--accent);color:#fff;font-size:.69rem"><i class="bi bi-pin-fill me-1"></i>Ghim</span>' : ''}
@@ -396,21 +435,21 @@
           ${a.attach_url ? `<span class="anc-meta"><i class="bi bi-${isImage(a.attach_url)?'image':'paperclip'} me-1"></i>${isImage(a.attach_url)?'Hình đính kèm':'File đính kèm'}</span>` : '<span></span>'}
           <span class="ms-auto" style="font-size:.82rem;color:var(--primary);font-weight:600">Xem nội dung <i class="bi bi-arrow-right-short fs-5"></i></span>
         </div>
-      </div>`).join('');
+      </button>`).join('');
 
     const dots = ancs.map((_, i) =>
-      `<div class="anc-dot${i===0?' active':''}" onclick="goAnc(${i})"></div>`
+      `<button type="button" class="anc-dot${i===0?' active':''}" onclick="goAnc(${i})" aria-label="Xem thông báo ${i+1}"></button>`
     ).join('');
 
     el.innerHTML = `
       <div class="anc-carousel-wrap fade-up">
-        <button class="anc-nav-btn" id="ancPrev" onclick="ancNav(-1)" disabled>
+        <button class="anc-nav-btn" id="ancPrev" onclick="ancNav(-1)" disabled aria-label="Thông báo trước">
           <i class="bi bi-chevron-left"></i>
         </button>
         <div class="anc-carousel-viewport">
           <div class="anc-carousel-track" id="ancTrack">${slides}</div>
         </div>
-        <button class="anc-nav-btn" id="ancNext" onclick="ancNav(1)" ${ancs.length<=1?'disabled':''}>
+        <button class="anc-nav-btn" id="ancNext" onclick="ancNav(1)" ${ancs.length<=1?'disabled':''} aria-label="Thông báo tiếp theo">
           <i class="bi bi-chevron-right"></i>
         </button>
       </div>

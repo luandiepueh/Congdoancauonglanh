@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
 <div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
 
 <div class="topbar">
@@ -36,6 +37,7 @@
       <li><a href="index.html"     class="nav-link nav-pill">Trang chủ</a></li>
       <li><a href="thong-bao.html" class="nav-link nav-pill">Thông báo</a></li>
       <li><a href="tai-lieu.html"  class="nav-link nav-pill">Tài liệu</a></li>
+      <li><a href="hoat-dong.html" class="nav-link nav-pill">Hoạt động</a></li>
       <li><a href="gop-y.html"     class="nav-link nav-pill active">Góp ý</a></li>
       <li id="adminNav" class="d-none">
         <a href="admin/index.html" class="nav-link nav-pill admin-link"><i class="bi bi-shield-lock me-1"></i>Quản trị</a>
@@ -45,7 +47,7 @@
 </nav>
 
 <!-- HEADER -->
-<div class="page-header-band">
+<div class="page-header-band" id="main">
   <div class="container">
     <div class="row align-items-center">
       <div class="col-lg-8">
@@ -101,15 +103,15 @@
         <div id="formWrap">
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+              <label class="form-label" for="fName">Họ và tên <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="fName" placeholder="Nguyễn Văn A" required>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Đơn vị / Tổ công đoàn</label>
+              <label class="form-label" for="fUnit">Đơn vị / Tổ công đoàn</label>
               <input type="text" class="form-control" id="fUnit" placeholder="VD: Tổ Kế toán">
             </div>
             <div class="col-12">
-              <label class="form-label">Phân loại <span class="text-danger">*</span></label>
+              <label class="form-label" for="fCat">Phân loại <span class="text-danger">*</span></label>
               <select class="form-select" id="fCat" required>
                 <option value="">-- Chọn loại --</option>
                 <option>Góp ý chung</option>
@@ -120,7 +122,7 @@
               </select>
             </div>
             <div class="col-12">
-              <label class="form-label">Nội dung <span class="text-danger">*</span></label>
+              <label class="form-label" for="fContent">Nội dung <span class="text-danger">*</span></label>
               <textarea class="form-control" id="fContent" rows="5" placeholder="Trình bày câu hỏi hoặc góp ý của bạn..." required style="resize:vertical"></textarea>
             </div>
           </div>
@@ -152,8 +154,9 @@
         <div class="form-section-title"><i class="bi bi-search me-2"></i>Tra cứu trạng thái</div>
         <p class="text-muted" style="font-size:.85rem">Nhập họ tên đã gửi để xem tất cả góp ý và trạng thái phản hồi của bạn.</p>
         <div class="input-group mb-3">
+          <label class="visually-hidden" for="searchName">Họ tên để tra cứu</label>
           <input type="text" class="form-control" id="searchName" placeholder="Nhập họ tên...">
-          <button class="btn btn-danger" onclick="lookup()"><i class="bi bi-search"></i></button>
+          <button class="btn btn-danger" onclick="lookup()" aria-label="Tra cứu"><i class="bi bi-search"></i></button>
         </div>
         <div id="lookupResult"></div>
       </div>
@@ -176,6 +179,7 @@
   <div class="container text-center" style="font-size:.82rem;color:#999">
     <a href="index.html" class="text-muted text-decoration-none me-3"><i class="bi bi-house me-1"></i>Trang chủ</a>
     <a href="thong-bao.html" class="text-muted text-decoration-none me-3"><i class="bi bi-megaphone me-1"></i>Thông báo</a>
+    <a href="hoat-dong.html" class="text-muted text-decoration-none me-3"><i class="bi bi-images me-1"></i>Hoạt động</a>
     <a href="tai-lieu.html" class="text-muted text-decoration-none"><i class="bi bi-folder2-open me-1"></i>Tài liệu</a>
     <hr style="border-color:#f0d0d0">
     © 2026 Công Đoàn Cơ Sở.

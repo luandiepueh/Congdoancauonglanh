@@ -9,9 +9,11 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
 <div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
 
 <div class="admin-layout">
+  <div class="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
   <!-- SIDEBAR -->
   <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -26,6 +28,7 @@
       <div class="nav-section-label">Quản lý nội dung</div>
       <a href="thong-bao.html"      class="admin-nav-link"><i class="bi bi-megaphone-fill"></i>Thông báo</a>
       <a href="tai-lieu.html"       class="admin-nav-link"><i class="bi bi-folder2-open"></i>Tài liệu</a>
+      <a href="hoat-dong.html"      class="admin-nav-link"><i class="bi bi-images"></i>Hoạt động</a>
       <a href="gop-y.html"          class="admin-nav-link"><i class="bi bi-chat-left-dots-fill"></i>Góp ý</a>
       <div class="nav-section-label">Hệ thống</div>
       <a href="quan-tri-vien.html"  class="admin-nav-link active"><i class="bi bi-person-gear"></i>Quản trị viên</a>
@@ -37,8 +40,9 @@
   </aside>
 
   <!-- MAIN -->
-  <main class="admin-main">
+  <main class="admin-main" id="main">
     <div class="admin-topbar">
+      <button type="button" class="admin-sidebar-toggle" onclick="toggleAdminSidebar()" aria-label="Mở/đóng menu điều hướng"><i class="bi bi-list"></i></button>
       <div>
         <div class="page-title">Quản lý Quản trị viên</div>
         <div class="page-sub">Thêm và phân quyền tài khoản quản trị hệ thống</div>
@@ -105,24 +109,24 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title"><i class="bi bi-person-plus-fill me-2"></i>Thêm quản trị viên mới</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
       </div>
       <div class="modal-body">
         <div id="addErrMsg" class="alert alert-danger d-none" style="border-radius:10px;font-size:.87rem"></div>
         <form id="addForm" autocomplete="off" onsubmit="return false">
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold" for="fName">Họ và tên <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="fName" placeholder="VD: Nguyễn Văn A" autocomplete="off">
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Email đăng nhập <span class="text-danger">*</span></label>
+            <label class="form-label fw-semibold" for="fEmail">Email đăng nhập <span class="text-danger">*</span></label>
             <input type="email" class="form-control" id="fEmail" placeholder="VD: nguyenvana@email.com" autocomplete="off">
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Vai trò</label>
+            <label class="form-label fw-semibold" for="fRole">Vai trò</label>
             <select class="form-select" id="fRole">
               <option value="Biên tập viên">Biên tập viên — đăng thông báo, thêm file, trả lời góp ý</option>
               <option value="Quản trị viên">Quản trị viên — toàn quyền (bao gồm quản lý tài khoản)</option>
@@ -131,17 +135,17 @@
 
           <div class="row g-3">
             <div class="col-6">
-              <label class="form-label fw-semibold">Mật khẩu tạm <span class="text-danger">*</span></label>
+              <label class="form-label fw-semibold" for="fPwd">Mật khẩu tạm <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="password" class="form-control" id="fPwd" placeholder="Tối thiểu 6 ký tự" autocomplete="new-password">
-                <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('fPwd','eyePwd')"><i class="bi bi-eye" id="eyePwd"></i></button>
+                <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('fPwd','eyePwd')" aria-label="Hiện mật khẩu"><i class="bi bi-eye" id="eyePwd"></i></button>
               </div>
             </div>
             <div class="col-6">
-              <label class="form-label fw-semibold">Xác nhận MK <span class="text-danger">*</span></label>
+              <label class="form-label fw-semibold" for="fPwd2">Xác nhận MK <span class="text-danger">*</span></label>
               <div class="input-group">
                 <input type="password" class="form-control" id="fPwd2" placeholder="Nhập lại MK" autocomplete="new-password">
-                <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('fPwd2','eyePwd2')"><i class="bi bi-eye" id="eyePwd2"></i></button>
+                <button type="button" class="btn btn-outline-secondary" onclick="togglePwd('fPwd2','eyePwd2')" aria-label="Hiện mật khẩu"><i class="bi bi-eye" id="eyePwd2"></i></button>
               </div>
             </div>
           </div>
@@ -250,8 +254,9 @@
   function togglePwd(inputId, iconId) {
     const inp = document.getElementById(inputId);
     const ico = document.getElementById(iconId);
-    if (inp.type === 'password') { inp.type = 'text';     ico.className = 'bi bi-eye-slash'; }
-    else                         { inp.type = 'password'; ico.className = 'bi bi-eye'; }
+    const btn = ico.closest('button');
+    if (inp.type === 'password') { inp.type = 'text';     ico.className = 'bi bi-eye-slash'; btn.setAttribute('aria-label', 'Ẩn mật khẩu'); }
+    else                         { inp.type = 'password'; ico.className = 'bi bi-eye'; btn.setAttribute('aria-label', 'Hiện mật khẩu'); }
   }
 
   // ===== ADD ADMIN =====

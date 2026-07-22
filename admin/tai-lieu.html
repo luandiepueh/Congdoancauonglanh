@@ -9,9 +9,11 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
+<a href="#main" class="skip-link">Bỏ qua để đến nội dung chính</a>
 <div class="bg-blob-1"></div><div class="bg-blob-2"></div><div class="bg-blob-3"></div>
 
 <div class="admin-layout">
+  <div class="admin-sidebar-backdrop" onclick="toggleAdminSidebar()"></div>
   <!-- SIDEBAR -->
   <aside class="admin-sidebar">
     <div class="sidebar-brand">
@@ -26,6 +28,7 @@
       <div class="nav-section-label">Quản lý nội dung</div>
       <a href="thong-bao.html" class="admin-nav-link"><i class="bi bi-megaphone-fill"></i>Thông báo</a>
       <a href="tai-lieu.html"  class="admin-nav-link active"><i class="bi bi-folder2-open"></i>Tài liệu</a>
+      <a href="hoat-dong.html" class="admin-nav-link"><i class="bi bi-images"></i>Hoạt động</a>
       <a href="gop-y.html"     class="admin-nav-link"><i class="bi bi-chat-left-dots-fill"></i>Góp ý</a>
       <div class="nav-section-label">Hệ thống</div>
       <a href="quan-tri-vien.html" class="admin-nav-link"><i class="bi bi-person-gear"></i>Quản trị viên</a>
@@ -37,8 +40,9 @@
   </aside>
 
   <!-- MAIN -->
-  <main class="admin-main">
+  <main class="admin-main" id="main">
     <div class="admin-topbar">
+      <button type="button" class="admin-sidebar-toggle" onclick="toggleAdminSidebar()" aria-label="Mở/đóng menu điều hướng"><i class="bi bi-list"></i></button>
       <div><div class="page-title">Quản lý Tài liệu</div><div class="page-sub">Upload file hoặc thêm link tài liệu cho đoàn viên tải xuống</div></div>
       <div class="d-flex gap-2">
         <button class="btn btn-outline-warning fw-semibold" onclick="openBatchModal()"><i class="bi bi-folder-plus me-1"></i>Upload nhiều file</button>
@@ -98,17 +102,17 @@
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header" style="background:var(--primary);color:#fff">
         <h5 class="modal-title" id="modalTitle">Thêm tài liệu mới</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="editId">
         <div class="mb-3">
-          <label class="form-label">Tên tài liệu <span class="text-danger">*</span></label>
+          <label class="form-label" for="fTitle">Tên tài liệu <span class="text-danger">*</span></label>
           <input type="text" class="form-control" id="fTitle" placeholder="VD: Biểu mẫu quyết toán kinh phí CĐ năm 2026">
         </div>
         <div class="row g-3 mb-3">
           <div class="col-md-6">
-            <label class="form-label">Loại <span class="text-danger">*</span></label>
+            <label class="form-label" for="fCat">Loại <span class="text-danger">*</span></label>
             <select class="form-select" id="fCat">
               <option>Biểu mẫu</option>
               <option>Hướng dẫn</option>
@@ -118,12 +122,12 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Phiên bản</label>
+            <label class="form-label" for="fVersion">Phiên bản</label>
             <input type="text" class="form-control" id="fVersion" placeholder="VD: v2.1, 2026...">
           </div>
         </div>
         <div class="mb-3">
-          <label class="form-label">Mô tả ngắn</label>
+          <label class="form-label" for="fDesc">Mô tả ngắn</label>
           <input type="text" class="form-control" id="fDesc" placeholder="Mô tả nội dung tài liệu...">
         </div>
 
@@ -161,18 +165,18 @@
     <div class="modal-content border-0 shadow-lg">
       <div class="modal-header" style="background:#e65100;color:#fff">
         <h5 class="modal-title"><i class="bi bi-folder-plus me-2"></i>Upload nhiều file cùng lúc</h5>
-        <button class="btn-close btn-close-white" data-bs-dismiss="modal" id="batchCloseX"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="batchCloseX" aria-label="Đóng"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label fw-semibold">Chọn file <span class="text-danger">*</span></label>
+          <label class="form-label fw-semibold" for="batchFiles">Chọn file <span class="text-danger">*</span></label>
           <input type="file" class="form-control" id="batchFiles" multiple
                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
           <small class="text-muted">Giữ <kbd>Ctrl</kbd> để chọn nhiều file cùng lúc · PDF, Word, Excel, PowerPoint · Tối đa 50MB/file</small>
         </div>
         <div class="row g-3 mb-3">
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Loại tài liệu <small class="fw-normal text-muted">(áp dụng cho tất cả)</small></label>
+            <label class="form-label fw-semibold" for="batchCat">Loại tài liệu <small class="fw-normal text-muted">(áp dụng cho tất cả)</small></label>
             <select class="form-select" id="batchCat">
               <option>Biểu mẫu</option>
               <option>Hướng dẫn</option>
@@ -182,7 +186,7 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label fw-semibold">Phiên bản <small class="fw-normal text-muted">(tùy chọn)</small></label>
+            <label class="form-label fw-semibold" for="batchVersion">Phiên bản <small class="fw-normal text-muted">(tùy chọn)</small></label>
             <input type="text" class="form-control" id="batchVersion" placeholder="VD: 2026, v1.0...">
           </div>
         </div>
