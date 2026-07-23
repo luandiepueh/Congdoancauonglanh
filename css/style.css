@@ -349,6 +349,35 @@ a.text-muted:hover { color: var(--primary) !important; }
 .doc-title { font-weight: 700; font-size: .95rem; color: var(--text); }
 .doc-meta  { font-size: .78rem; color: var(--text-muted); }
 
+/* Chế độ xem dạng danh sách (list view) — hàng ngang, gọn hơn grid */
+.doc-card.doc-card-list { flex-direction: row; align-items: center; padding: .7rem 1rem; }
+.doc-card.doc-card-list .doc-icon-box { width: 40px; height: 40px; font-size: 1.4rem; }
+.doc-card.doc-card-list .doc-title { font-size: .88rem; }
+
+/* ===== THƯ MỤC TÀI LIỆU (folder cards) ===== */
+.folder-card {
+  background: #fff;
+  border: 1px solid var(--glass-border); border-radius: 16px;
+  padding: 1.3rem 1.15rem; height: 100%;
+  cursor: pointer; transition: all .22s; text-align: left;
+  display: flex; flex-direction: column; gap: .6rem;
+}
+.folder-card:hover { background: #f8faff; transform: translateY(-4px); box-shadow: 0 10px 30px rgba(37,99,235,.14); }
+.folder-icon-box {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center; font-size: 1.9rem;
+}
+.folder-name  { font-weight: 700; font-size: 1rem; color: var(--text); }
+.folder-count { font-size: .78rem; color: var(--text-muted); }
+
+/* Breadcrumb + view toggle khi mở 1 thư mục */
+.doc-breadcrumb { font-size: .88rem; color: var(--text-muted); display: flex; align-items: center; gap: .4rem; }
+.doc-breadcrumb a { color: var(--primary); text-decoration: none; font-weight: 600; }
+.doc-breadcrumb a:hover { text-decoration: underline; }
+
+.view-toggle-btn { border: 1.5px solid #ddd; background: #fff; color: var(--text-muted); }
+.view-toggle-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
 /* ===== ACTIVITIES GALLERY (Hình ảnh hoạt động) ===== */
 .gallery-card {
   background: #fff; border: 1px solid var(--glass-border); border-radius: var(--r-md);

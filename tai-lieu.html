@@ -57,29 +57,18 @@
 
 <div class="container py-4" style="margin-top:-2rem;position:relative;z-index:5">
 
-  <!-- FILTER + SEARCH -->
+  <!-- SEARCH -->
   <div class="app-card mb-4">
     <div class="card-body p-3">
-      <div class="row g-2 align-items-center">
-        <div class="col-md-8">
-          <ul class="nav nav-pills gap-1 flex-wrap" id="catFilter">
-            <li><button class="nav-link active btn btn-sm" onclick="setCat(this,'')"><i class="bi bi-grid me-1"></i>Tất cả</button></li>
-            <li><button class="nav-link btn btn-sm" onclick="setCat(this,'Biểu mẫu')"><i class="bi bi-file-earmark-spreadsheet me-1"></i>Biểu mẫu</button></li>
-            <li><button class="nav-link btn btn-sm" onclick="setCat(this,'Hướng dẫn')"><i class="bi bi-book me-1"></i>Hướng dẫn</button></li>
-            <li><button class="nav-link btn btn-sm" onclick="setCat(this,'Quy chế')"><i class="bi bi-file-earmark-text me-1"></i>Quy chế</button></li>
-            <li><button class="nav-link btn btn-sm" onclick="setCat(this,'Quyết định')"><i class="bi bi-file-earmark-check me-1"></i>Quyết định</button></li>
-            <li><button class="nav-link btn btn-sm" onclick="setCat(this,'Khác')">Khác</button></li>
-          </ul>
-        </div>
-        <div class="col-md-4">
-          <div class="input-group">
-            <span class="input-group-text" style="border-radius:8px 0 0 8px;border:1.5px solid #ddd"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" class="form-control" id="searchBox" placeholder="Tìm tài liệu..." oninput="applyFilter()" style="border-radius:0 8px 8px 0;border:1.5px solid #ddd;border-left:none">
-          </div>
-        </div>
+      <div class="input-group">
+        <span class="input-group-text" style="border-radius:8px 0 0 8px;border:1.5px solid #ddd"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" class="form-control" id="searchBox" placeholder="Tìm tài liệu trong tất cả thư mục..." oninput="applyFilter()" style="border-radius:0 8px 8px 0;border:1.5px solid #ddd;border-left:none">
       </div>
     </div>
   </div>
+
+  <!-- BREADCRUMB + TOOLBAR -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2" id="headerRow"></div>
 
   <!-- TOTAL -->
   <div class="text-muted mb-3" style="font-size:.85rem"><span id="docCount">0</span> tài liệu</div>
@@ -107,60 +96,141 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="js/config.js"></script>
 <script>
   document.getElementById('topDate').textContent = new Date().toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
   document.getElementById('navOrg').textContent = APP_CONFIG.orgName;
   sb.auth.getSession().then(({data:{session}}) => { if(session) document.getElementById('adminNav').classList.remove('d-none'); });
 
-  let allDocs = [], curCat = '';
+  let allDocs = [], allFolders = [], curFolder = null;
+  let viewMode = localStorage.getItem('docViewMode') || 'grid';
 
-  async function loadDocs() {
-    const { data, error } = await sb.from('documents').select('*').order('category').order('created_at',{ascending:false});
-    if (error) {
+  async function loadData() {
+    const [{ data: docs, error: docErr }, { data: folders }] = await Promise.all([
+      sb.from('documents').select('*').order('category').order('created_at',{ascending:false}),
+      sb.from('doc_folders').select('*').order('sort_order').order('name')
+    ]);
+    if (docErr) {
       document.getElementById('docList').innerHTML = '<div class="col-12 empty-state"><i class="bi bi-exclamation-triangle"></i><p class="mt-2 text-danger">Không thể tải dữ liệu.</p></div>';
       return;
     }
-    allDocs = data || [];
-    applyFilter();
+    allDocs = docs || [];
+    allFolders = folders || [];
+    render();
   }
 
-  function setCat(btn, cat) {
-    curCat = cat;
-    document.querySelectorAll('#catFilter .nav-link').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    applyFilter();
+  function folderMeta(name) {
+    return allFolders.find(f => f.name === name) || DOC_META[name] || DOC_META['Khác'];
   }
 
-  function applyFilter() {
-    const q = document.getElementById('searchBox').value.toLowerCase();
-    const list = allDocs.filter(d => {
-      const matchCat = !curCat || d.category === curCat;
-      const matchQ   = !q || d.title.toLowerCase().includes(q) || (d.description||'').toLowerCase().includes(q);
-      return matchCat && matchQ;
-    });
-    document.getElementById('docCount').textContent = list.length;
-    render(list);
+  function openFolder(id) {
+    curFolder = allFolders.find(f => f.id === id);
+    document.getElementById('searchBox').value = '';
+    render();
   }
 
-  function render(docs) {
+  function backToFolders() {
+    curFolder = null;
+    document.getElementById('searchBox').value = '';
+    render();
+  }
+
+  function setViewMode(mode) {
+    viewMode = mode;
+    localStorage.setItem('docViewMode', mode);
+    render();
+  }
+
+  function applyFilter() { render(); }
+
+  function render() {
+    const q = document.getElementById('searchBox').value.trim().toLowerCase();
+
+    if (q) {
+      const list = allDocs.filter(d =>
+        d.title.toLowerCase().includes(q) || (d.description||'').toLowerCase().includes(q) || (d.category||'').toLowerCase().includes(q)
+      );
+      renderHeader('search');
+      renderDocList(list);
+      return;
+    }
+
+    if (curFolder) {
+      const list = allDocs.filter(d => d.category === curFolder.name);
+      renderHeader('folder', list.length);
+      renderDocList(list);
+      return;
+    }
+
+    renderHeader('overview');
+    renderFolderGrid();
+  }
+
+  function renderHeader(mode, count) {
+    const row = document.getElementById('headerRow');
+    const crumb = `<div class="doc-breadcrumb"><i class="bi bi-folder2-open"></i><a href="#" onclick="backToFolders();return false">Tài liệu</a>`
+      + (mode === 'folder' ? ` <i class="bi bi-chevron-right" style="font-size:.7rem"></i> <span class="text-body fw-semibold">${folderMeta(curFolder.name).icon||''} ${escHtml(curFolder.name)}</span>` : '')
+      + (mode === 'search' ? ` <i class="bi bi-chevron-right" style="font-size:.7rem"></i> <span class="text-body fw-semibold">Kết quả tìm kiếm</span>` : '')
+      + `</div>`;
+
+    let toolbar = '';
+    if (mode === 'folder') {
+      toolbar = `<div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-primary" id="dlAllBtn" onclick="downloadFolderZip('${curFolder.id}')"><i class="bi bi-file-earmark-zip me-1"></i>Tải tất cả</button>
+        <div class="btn-group btn-group-sm">
+          <button class="btn view-toggle-btn ${viewMode==='grid'?'active':''}" onclick="setViewMode('grid')" title="Xem dạng lưới"><i class="bi bi-grid-3x3-gap"></i></button>
+          <button class="btn view-toggle-btn ${viewMode==='list'?'active':''}" onclick="setViewMode('list')" title="Xem dạng danh sách"><i class="bi bi-list-ul"></i></button>
+        </div>
+      </div>`;
+    }
+    row.innerHTML = crumb + toolbar;
+  }
+
+  function renderFolderGrid() {
+    document.getElementById('docCount').textContent = allDocs.length;
+    const el = document.getElementById('docList');
+    if (!allFolders.length) {
+      el.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-folder2-open"></i><p class="mt-2">Chưa có thư mục nào.</p></div>';
+      return;
+    }
+    el.innerHTML = allFolders.map((f,i) => {
+      const count = allDocs.filter(d => d.category === f.name).length;
+      return `<div class="col-md-6 col-lg-4 fade-up" style="animation-delay:${i*0.04}s">
+        <button type="button" class="folder-card w-100 border-0" onclick="openFolder('${f.id}')">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="folder-icon-box" style="background:${f.color}">${f.icon}</div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" title="Tải tất cả thư mục này" onclick="event.stopPropagation();downloadFolderZip('${f.id}')"><i class="bi bi-file-earmark-zip"></i></button>
+          </div>
+          <div class="folder-name">${escHtml(f.name)}</div>
+          <div class="folder-count">${count} tài liệu</div>
+        </button>
+      </div>`;
+    }).join('');
+  }
+
+  function renderDocList(docs) {
+    document.getElementById('docCount').textContent = docs.length;
     const el = document.getElementById('docList');
     if (!docs.length) {
       el.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-folder2-open"></i><p class="mt-2">Không tìm thấy tài liệu nào.</p></div>';
       return;
     }
+    const isList = viewMode === 'list';
+    const colClass = isList ? 'col-12' : 'col-md-6 col-lg-4';
+    const cardClass = isList ? 'doc-card doc-card-list' : 'doc-card';
     el.innerHTML = docs.map((d,i) => {
-      const m = DOC_META[d.category] || DOC_META['Khác'];
-      return `<div class="col-md-6 col-lg-4 fade-up" style="animation-delay:${i*0.04}s">
-        <div class="doc-card">
-          <div style="background:${m.bg};border-radius:10px;width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0">${m.icon}</div>
+      const m = folderMeta(d.category);
+      return `<div class="${colClass} fade-up" style="animation-delay:${i*0.04}s">
+        <div class="${cardClass}">
+          <div class="doc-icon-box" style="background:${m.bg||m.color};border-radius:10px;width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0">${m.icon}</div>
           <div class="flex-grow-1 min-width-0">
             <div class="doc-title">${escHtml(d.title)}</div>
             <div class="doc-meta mt-1 d-flex flex-wrap gap-1">
               <span class="badge text-bg-light border">${escHtml(d.category)}</span>
               ${d.version ? `<span class="badge text-bg-secondary">v${escHtml(d.version)}</span>` : ''}
             </div>
-            ${d.description ? `<p class="text-muted mt-2 mb-0" style="font-size:.8rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escHtml(d.description)}</p>` : ''}
+            ${(!isList && d.description) ? `<p class="text-muted mt-2 mb-0" style="font-size:.8rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escHtml(d.description)}</p>` : ''}
             <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
               <a href="${escHtml(d.file_url)}" target="_blank" class="btn btn-sm btn-primary-custom" onclick="trackDl('${d.id}')">
                 <i class="bi bi-download me-1"></i>Tải xuống
@@ -183,7 +253,61 @@
     if (d) d.download_count = (d.download_count||0) + 1;
   }
 
-  loadDocs();
+  async function downloadFolderZip(id) {
+    const folder = allFolders.find(f => f.id === id);
+    if (!folder) return;
+    const docs = allDocs.filter(d => d.category === folder.name);
+    if (!docs.length) { showToast('Thư mục này chưa có tài liệu nào.','warning'); return; }
+
+    const btn = document.getElementById('dlAllBtn');
+    const setBtnText = (txt) => { if (btn) btn.innerHTML = `<i class="bi bi-hourglass-split me-1"></i>${txt}`; };
+    if (btn) btn.disabled = true;
+    setBtnText(`Đang tải 0/${docs.length}...`);
+
+    const zip = new JSZip();
+    const usedNames = new Set();
+    let ok = 0, failed = 0;
+
+    for (let i = 0; i < docs.length; i++) {
+      const d = docs[i];
+      setBtnText(`Đang tải ${i+1}/${docs.length}...`);
+      try {
+        const res = await fetch(d.file_url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        let name = d.file_name || (d.title + '');
+        if (usedNames.has(name)) name = `${i+1}_${name}`;
+        usedNames.add(name);
+        zip.file(name, blob);
+        trackDl(d.id);
+        ok++;
+      } catch (err) {
+        failed++;
+      }
+    }
+
+    if (!ok) {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-file-earmark-zip me-1"></i>Tải tất cả'; }
+      showToast('Không tải được file nào (có thể do file là link ngoài không hỗ trợ nén).','danger');
+      return;
+    }
+
+    setBtnText('Đang nén file...');
+    const content = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(content);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${folder.name}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-file-earmark-zip me-1"></i>Tải tất cả'; }
+    showToast(`Đã tải ${ok} file${failed ? `, ${failed} file lỗi` : ''} trong "${folder.name}.zip"`, failed ? 'warning' : 'success');
+  }
+
+  loadData();
 </script>
 </body>
 </html>
