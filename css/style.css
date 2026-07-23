@@ -158,6 +158,13 @@ a.text-muted:hover { color: var(--primary) !important; }
   line-height: 1.15; text-shadow: 0 2px 16px rgba(0,0,0,.20);
 }
 .hero-sub    { font-size: 1.05rem; color: rgba(255,255,255,.80); max-width: 560px; }
+.hero-slogan {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .6rem;
+  font-size: clamp(1.05rem, 2.5vw, 1.5rem); font-weight: 800; color: #fde68a;
+  text-shadow: 0 0 22px rgba(251,191,36,.55), 0 2px 10px rgba(0,0,0,.25);
+  letter-spacing: .3px; line-height: 1.3; margin-bottom: 1.2rem;
+}
+.hero-slogan-dot { color: #fbbf24; font-size: 1rem; opacity: .8; }
 .hero-stats  { display: flex; gap: 2.5rem; margin-top: 2.5rem; flex-wrap: wrap; }
 .hero-stat-num   { font-size: 2.1rem; font-weight: 800; line-height: 1; color: #fff; }
 .hero-stat-label { font-size: .72rem; color: rgba(255,255,255,.65); margin-top: .3rem; }
@@ -600,7 +607,7 @@ a.text-muted:hover { color: var(--primary) !important; }
 .hero-union-frame {
   position: relative;
   width: 210px; height: 210px;
-  border-radius: 48px;
+  border-radius: 50%;
   background: linear-gradient(150deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.10) 55%, rgba(255,255,255,.18) 100%);
   border: 1px solid rgba(255,255,255,0.30);
   box-shadow:
@@ -614,46 +621,26 @@ a.text-muted:hover { color: var(--primary) !important; }
 }
 .hero-union-frame::before {
   content: '';
-  position: absolute; inset: 0; border-radius: 48px;
+  position: absolute; inset: 0; border-radius: 50%;
   background: repeating-linear-gradient(
     0deg, transparent, transparent 3px,
     rgba(255,255,255,0.03) 3px, rgba(255,255,255,0.03) 6px
   );
   pointer-events: none;
 }
-.hero-union-frame::after {
-  content: '';
-  position: absolute; top: 0; left: 22%; right: 22%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.50), transparent);
-  pointer-events: none;
-}
-.hero-union-svg {
-  width: 130px; height: auto;
+.hero-union-badge {
   position: relative; z-index: 2;
-  filter: drop-shadow(0 3px 14px rgba(0,0,0,0.25));
+  width: 190px; height: 190px;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,.25));
 }
-.hero-union-bar {
-  position: absolute;
-  bottom: 46px; left: 50%; transform: translateX(-50%);
-  width: 110px; height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.9) 30%, #fbbf24 70%, transparent);
-  border-radius: 50%; z-index: 3;
-  box-shadow:
-    0 0 8px  rgba(255,255,255,0.8),
-    0 0 20px rgba(251,191,36,0.55);
-  animation: neonPulse 2.2s ease-in-out infinite;
+.hero-union-badge-text {
+  font-family: 'Be Vietnam Pro', sans-serif; font-weight: 700;
+  font-size: 13px; letter-spacing: .1px; fill: #fff;
+  paint-order: stroke; stroke: rgba(15,23,42,.45); stroke-width: 2.5px; stroke-linejoin: round;
 }
-.hero-union-ambient {
-  position: absolute;
-  bottom: 16px; left: 50%; transform: translateX(-50%);
-  width: 150px; height: 70px;
-  background: radial-gradient(ellipse, rgba(255,255,255,0.20) 0%, rgba(251,191,36,0.08) 45%, transparent 70%);
-  filter: blur(18px);
-  pointer-events: none;
-  animation: neonPulse 2.2s ease-in-out infinite;
-}
+.hero-union-badge-star { font-size: 11px; fill: #fbbf24; }
 .hero-union-ring {
-  position: absolute; inset: -28px; border-radius: 72px;
+  position: absolute; inset: -28px; border-radius: 50%;
   background: radial-gradient(ellipse at 50% 75%, rgba(255,255,255,0.12) 0%, transparent 65%);
   pointer-events: none; z-index: 1;
   animation: neonPulse 2.2s ease-in-out infinite;
