@@ -68,6 +68,12 @@
           </div>
           <span class="text-muted" style="font-size:.83rem"><span id="docCount">0</span> tài liệu</span>
         </div>
+        <div class="card-body p-3 pt-0 d-none align-items-center gap-2 flex-wrap" id="bulkBar">
+          <span class="fw-semibold" style="font-size:.85rem"><span id="bulkCount">0</span> tài liệu đã chọn</span>
+          <select class="form-select form-select-sm w-auto" id="bulkTargetFolder"><option value="">— Chọn thư mục đích —</option></select>
+          <button class="btn btn-sm btn-danger fw-semibold" onclick="bulkMove()"><i class="bi bi-folder-symlink me-1"></i>Chuyển vào thư mục</button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="clearSelection()">Bỏ chọn</button>
+        </div>
       </div>
 
       <!-- TABLE VIEW -->
@@ -77,6 +83,7 @@
             <table class="table data-table mb-0">
               <thead>
                 <tr>
+                  <th style="width:36px"><input type="checkbox" class="form-check-input" id="selectAllChk" onchange="toggleSelectAll(this.checked)" title="Chọn tất cả"></th>
                   <th>Tên tài liệu</th>
                   <th style="width:120px">Loại</th>
                   <th style="width:70px">Phiên bản</th>
@@ -86,7 +93,7 @@
                 </tr>
               </thead>
               <tbody id="docBody">
-                <tr><td colspan="6" class="text-center py-4"><div class="spinner-border spinner-border-sm text-danger"></div></td></tr>
+                <tr><td colspan="7" class="text-center py-4"><div class="spinner-border spinner-border-sm text-danger"></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -311,17 +318,64 @@
     if (mode === 'grid') renderGrid();
   }
 
+  // Chọn nhiều tài liệu để chuyển hàng loạt sang thư mục khác
+  let selectedDocIds = new Set();
+  let lastFilteredIds = [];
+
+  function toggleDocSelect(id, checked) {
+    if (checked) selectedDocIds.add(id); else selectedDocIds.delete(id);
+    updateBulkBar();
+  }
+
+  function toggleSelectAll(checked) {
+    lastFilteredIds.forEach(id => checked ? selectedDocIds.add(id) : selectedDocIds.delete(id));
+    renderFiltered();
+  }
+
+  function clearSelection() {
+    selectedDocIds.clear();
+    renderFiltered();
+  }
+
+  function updateBulkBar() {
+    const bar = document.getElementById('bulkBar');
+    const n = selectedDocIds.size;
+    document.getElementById('bulkCount').textContent = n;
+    bar.classList.toggle('d-none', n === 0);
+    bar.classList.toggle('d-flex', n > 0);
+    const allChk = document.getElementById('selectAllChk');
+    allChk.checked = lastFilteredIds.length > 0 && lastFilteredIds.every(id => selectedDocIds.has(id));
+    allChk.indeterminate = !allChk.checked && lastFilteredIds.some(id => selectedDocIds.has(id));
+  }
+
+  async function bulkMove() {
+    const target = document.getElementById('bulkTargetFolder').value;
+    if (!target) { showToast('Vui lòng chọn thư mục đích','warning'); return; }
+    const ids = [...selectedDocIds];
+    if (!ids.length) return;
+    if (!confirm(`Chuyển ${ids.length} tài liệu vào thư mục "${target}"?`)) return;
+    showLoading(true);
+    const { error } = await sb.from('documents').update({ category: target, updated_at: new Date().toISOString() }).in('id', ids);
+    showLoading(false);
+    if (error) { showToast('Lỗi: '+error.message,'danger'); return; }
+    showToast(`Đã chuyển ${ids.length} tài liệu vào "${target}"`,'success');
+    selectedDocIds.clear();
+    loadDocs();
+  }
+
   function renderFiltered() {
     const s = document.getElementById('searchBox').value.toLowerCase();
     const list = allDocs.filter(d => !s || d.title.toLowerCase().includes(s) || (d.description||'').toLowerCase().includes(s));
     document.getElementById('docCount').textContent = list.length;
+    lastFilteredIds = list.map(d => d.id);
     const tbody = document.getElementById('docBody');
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">Không có tài liệu nào.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Không có tài liệu nào.</td></tr>';
     } else {
       tbody.innerHTML = list.map(d => {
         const m = folderMeta(d.category);
         return `<tr>
+          <td><input type="checkbox" class="form-check-input" ${selectedDocIds.has(d.id)?'checked':''} onchange="toggleDocSelect('${d.id}', this.checked)"></td>
           <td>
             <div class="d-flex align-items-center gap-2">
               <span style="font-size:1.4rem">${m.icon}</span>
@@ -343,6 +397,7 @@
         </tr>`;
       }).join('');
     }
+    updateBulkBar();
     if (adminView === 'grid') renderGrid();
   }
 
@@ -436,6 +491,7 @@
     document.getElementById('filterCat').innerHTML = '<option value="">Tất cả thư mục</option>' + opts;
     document.getElementById('fCat').innerHTML = opts;
     document.getElementById('batchCat').innerHTML = opts;
+    document.getElementById('bulkTargetFolder').innerHTML = '<option value="">— Chọn thư mục đích —</option>' + opts;
   }
 
   // excludeId: khi sửa thư mục, không cho chọn chính nó hoặc thư mục con của nó làm thư mục cha (tránh vòng lặp)

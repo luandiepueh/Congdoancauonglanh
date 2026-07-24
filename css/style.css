@@ -637,12 +637,16 @@ a.text-muted:hover { color: var(--primary) !important; }
   position: relative;
   width: 210px; height: 210px;
   border-radius: 50%;
-  background: linear-gradient(150deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.10) 55%, rgba(255,255,255,.18) 100%);
-  border: 1px solid rgba(255,255,255,0.30);
+  /* Kính mờ gần như đặc (không phải trong suốt xanh) để logo lên đúng màu gốc,
+     không bị ám xanh từ nền hero phía sau. */
+  background: linear-gradient(150deg, rgba(255,255,255,.94) 0%, rgba(255,255,255,.86) 55%, rgba(255,255,255,.92) 100%);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.7);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.8),
     0 24px 64px rgba(0,0,0,0.20),
-    0 0 90px rgba(255,255,255,0.10);
+    0 0 90px rgba(255,255,255,0.18);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
   animation: heroFloat 3.8s ease-in-out infinite;
@@ -653,19 +657,19 @@ a.text-muted:hover { color: var(--primary) !important; }
   position: absolute; inset: 0; border-radius: 50%;
   background: repeating-linear-gradient(
     0deg, transparent, transparent 3px,
-    rgba(255,255,255,0.03) 3px, rgba(255,255,255,0.03) 6px
+    rgba(37,99,235,0.025) 3px, rgba(37,99,235,0.025) 6px
   );
   pointer-events: none;
 }
 .hero-union-badge {
   position: relative; z-index: 2;
   width: 190px; height: 190px;
-  filter: drop-shadow(0 4px 16px rgba(0,0,0,.25));
+  filter: drop-shadow(0 4px 12px rgba(30,58,138,.20));
 }
 .hero-union-badge-text {
   font-family: 'Be Vietnam Pro', sans-serif; font-weight: 700;
-  font-size: 13px; letter-spacing: .1px; fill: #fff;
-  paint-order: stroke; stroke: rgba(15,23,42,.45); stroke-width: 2.5px; stroke-linejoin: round;
+  font-size: 13px; letter-spacing: .1px; fill: var(--primary-dark);
+  paint-order: stroke; stroke: rgba(255,255,255,.85); stroke-width: 2.5px; stroke-linejoin: round;
 }
 .hero-union-badge-star { font-size: 11px; fill: #fbbf24; }
 .hero-union-ring {
