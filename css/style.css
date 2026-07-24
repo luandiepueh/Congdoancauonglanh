@@ -668,8 +668,8 @@ a.text-muted:hover { color: var(--primary) !important; }
 }
 .hero-union-badge-text {
   font-family: 'Be Vietnam Pro', sans-serif; font-weight: 700;
-  font-size: 13px; letter-spacing: .1px; fill: var(--primary-dark);
-  paint-order: stroke; stroke: rgba(255,255,255,.85); stroke-width: 2.5px; stroke-linejoin: round;
+  font-size: 13px; letter-spacing: .1px; fill: var(--text);
+  paint-order: stroke; stroke: rgba(255,255,255,.9); stroke-width: 2.5px; stroke-linejoin: round;
 }
 .hero-union-badge-star { font-size: 11px; fill: #fbbf24; }
 .hero-union-ring {
