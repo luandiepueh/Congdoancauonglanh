@@ -213,7 +213,7 @@
         <!-- FORM THÊM/SỬA THƯ MỤC -->
         <div class="app-card p-3 mb-3">
           <input type="hidden" id="editFolderId">
-          <div class="row g-2 align-items-end">
+          <div class="row g-2">
             <div class="col-md-2">
               <label class="form-label mb-1" for="fldIcon">Icon</label>
               <input type="text" class="form-control text-center" id="fldIcon" maxlength="4" value="📁" placeholder="📁">
@@ -223,13 +223,19 @@
               <input type="text" class="form-control" id="fldName" placeholder="VD: Nghị quyết">
             </div>
             <div class="col-md-3">
+              <label class="form-label mb-1" for="fldParent">Thư mục cha</label>
+              <select class="form-select" id="fldParent">
+                <option value="">— Thư mục gốc —</option>
+              </select>
+            </div>
+            <div class="col-md-3">
               <label class="form-label mb-1" for="fldColor">Màu nền</label>
               <input type="color" class="form-control form-control-color w-100" id="fldColor" value="#e8eaf6">
             </div>
-            <div class="col-md-3 d-flex gap-2">
-              <button class="btn btn-danger fw-semibold flex-grow-1" onclick="saveFolder()"><i class="bi bi-save me-1"></i><span id="fldSaveTxt">Thêm</span></button>
-              <button class="btn btn-outline-secondary d-none" id="fldCancelBtn" onclick="resetFolderForm()" title="Hủy sửa"><i class="bi bi-x-lg"></i></button>
-            </div>
+          </div>
+          <div class="d-flex justify-content-end gap-2 mt-2">
+            <button class="btn btn-outline-secondary d-none" id="fldCancelBtn" onclick="resetFolderForm()" title="Hủy sửa"><i class="bi bi-x-lg me-1"></i>Hủy</button>
+            <button class="btn btn-danger fw-semibold px-4" onclick="saveFolder()"><i class="bi bi-save me-1"></i><span id="fldSaveTxt">Thêm</span></button>
           </div>
         </div>
 
@@ -262,6 +268,24 @@
 
   function folderMeta(name) {
     return allFolders.find(f => f.name === name) || DOC_META[name] || DOC_META['Khác'];
+  }
+
+  // Thư mục con: cây thư mục dùng chung cho danh sách quản lý + các dropdown chọn thư mục
+  function folderChildren(parentId) {
+    return allFolders
+      .filter(f => (f.parent_id || null) === (parentId || null))
+      .sort((a,b) => (a.sort_order - b.sort_order) || a.name.localeCompare(b.name, 'vi'));
+  }
+
+  function flattenFolders(parentId = null, depth = 0, out = []) {
+    folderChildren(parentId).forEach(f => { out.push({ ...f, depth }); flattenFolders(f.id, depth + 1, out); });
+    return out;
+  }
+
+  function folderDescendantIds(id) {
+    const ids = [];
+    folderChildren(id).forEach(c => { ids.push(c.id); ids.push(...folderDescendantIds(c.id)); });
+    return ids;
   }
 
   function docBadge(cat) {
@@ -329,16 +353,16 @@
       (!s || d.title.toLowerCase().includes(s) || (d.description||'').toLowerCase().includes(s)) &&
       (!filterFolder || d.category === filterFolder)
     );
-    const folders = filterFolder ? allFolders.filter(f => f.name === filterFolder) : allFolders;
+    const folders = (filterFolder ? flattenFolders().filter(f => f.name === filterFolder) : flattenFolders());
     const el = document.getElementById('docGrid');
     if (!folders.length) { el.innerHTML = '<div class="col-12 text-muted text-center py-4">Chưa có thư mục nào.</div>'; return; }
 
     const blocks = folders.map(f => {
       const docs = list.filter(d => d.category === f.name);
       if (!docs.length) return '';
-      return `<div class="col-12 mb-2">
+      return `<div class="col-12 mb-2" style="padding-left:${f.depth*1.5}rem">
         <div class="d-flex align-items-center justify-content-between mb-2">
-          <div class="fw-semibold"><span style="font-size:1.2rem">${f.icon}</span> ${escHtml(f.name)} <span class="text-muted fw-normal">(${docs.length})</span></div>
+          <div class="fw-semibold">${f.depth ? '<i class="bi bi-arrow-return-right text-muted me-1"></i>' : ''}<span style="font-size:1.2rem">${f.icon}</span> ${escHtml(f.name)} <span class="text-muted fw-normal">(${docs.length})</span></div>
           <button class="btn btn-sm btn-outline-primary" onclick="downloadFolderZip('${f.id}')"><i class="bi bi-file-earmark-zip me-1"></i>Tải tất cả</button>
         </div>
         <div class="row g-3">
@@ -406,10 +430,22 @@
   }
 
   function populateCatSelects() {
-    const opts = allFolders.map(f => `<option value="${escHtml(f.name)}">${f.icon} ${escHtml(f.name)}</option>`).join('');
+    const opts = flattenFolders().map(f =>
+      `<option value="${escHtml(f.name)}">${f.depth ? '　'.repeat(f.depth) + '└ ' : ''}${f.icon} ${escHtml(f.name)}</option>`
+    ).join('');
     document.getElementById('filterCat').innerHTML = '<option value="">Tất cả thư mục</option>' + opts;
     document.getElementById('fCat').innerHTML = opts;
     document.getElementById('batchCat').innerHTML = opts;
+  }
+
+  // excludeId: khi sửa thư mục, không cho chọn chính nó hoặc thư mục con của nó làm thư mục cha (tránh vòng lặp)
+  function populateParentSelect(excludeId) {
+    const excluded = new Set(excludeId ? [excludeId, ...folderDescendantIds(excludeId)] : []);
+    const opts = flattenFolders()
+      .filter(f => !excluded.has(f.id))
+      .map(f => `<option value="${f.id}">${f.depth ? '　'.repeat(f.depth) + '└ ' : ''}${f.icon} ${escHtml(f.name)}</option>`)
+      .join('');
+    document.getElementById('fldParent').innerHTML = '<option value="">— Thư mục gốc —</option>' + opts;
   }
 
   function openFolderMgmt() {
@@ -421,18 +457,26 @@
   function renderFolderList() {
     const el = document.getElementById('folderList');
     if (!allFolders.length) { el.innerHTML = '<p class="text-muted text-center py-3">Chưa có thư mục nào.</p>'; return; }
-    el.innerHTML = allFolders.map(f => {
+    el.innerHTML = flattenFolders().map(f => {
       const count = allDocs.filter(d => d.category === f.name).length;
-      return `<div class="d-flex align-items-center gap-2 py-2 border-bottom">
+      return `<div class="d-flex align-items-center gap-2 py-2 border-bottom" style="padding-left:${f.depth*1.75}rem">
+        ${f.depth ? '<i class="bi bi-arrow-return-right text-muted"></i>' : ''}
         <div style="background:${f.color};width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">${f.icon}</div>
         <div class="flex-grow-1 min-width-0">
           <div class="fw-semibold">${escHtml(f.name)}</div>
           <div class="text-muted" style="font-size:.78rem">${count} tài liệu</div>
         </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="openSubfolderForm('${f.id}')" title="Thêm thư mục con"><i class="bi bi-folder-plus"></i></button>
         <button class="btn btn-sm btn-outline-primary" onclick="editFolder('${f.id}')" title="Sửa"><i class="bi bi-pencil"></i></button>
         <button class="btn btn-sm btn-outline-danger" onclick="delFolder('${f.id}')" title="Xóa"><i class="bi bi-trash"></i></button>
       </div>`;
     }).join('');
+  }
+
+  function openSubfolderForm(parentId) {
+    resetFolderForm();
+    document.getElementById('fldParent').value = parentId;
+    document.getElementById('fldName').focus();
   }
 
   function editFolder(id) {
@@ -442,6 +486,8 @@
     document.getElementById('fldIcon').value = f.icon;
     document.getElementById('fldName').value = f.name;
     document.getElementById('fldColor').value = f.color;
+    populateParentSelect(f.id);
+    document.getElementById('fldParent').value = f.parent_id || '';
     document.getElementById('fldSaveTxt').textContent = 'Lưu thay đổi';
     document.getElementById('fldCancelBtn').classList.remove('d-none');
   }
@@ -451,22 +497,25 @@
     document.getElementById('fldIcon').value = '📁';
     document.getElementById('fldName').value = '';
     document.getElementById('fldColor').value = '#e8eaf6';
+    populateParentSelect(null);
+    document.getElementById('fldParent').value = '';
     document.getElementById('fldSaveTxt').textContent = 'Thêm';
     document.getElementById('fldCancelBtn').classList.add('d-none');
   }
 
   async function saveFolder() {
-    const id    = document.getElementById('editFolderId').value;
-    const name  = document.getElementById('fldName').value.trim();
-    const icon  = document.getElementById('fldIcon').value.trim() || '📁';
-    const color = document.getElementById('fldColor').value;
+    const id       = document.getElementById('editFolderId').value;
+    const name     = document.getElementById('fldName').value.trim();
+    const icon     = document.getElementById('fldIcon').value.trim() || '📁';
+    const color    = document.getElementById('fldColor').value;
+    const parentId = document.getElementById('fldParent').value || null;
     if (!name) { showToast('Vui lòng nhập tên thư mục','danger'); return; }
     if (allFolders.some(f => f.name === name && f.id !== id)) { showToast('Đã có thư mục trùng tên','danger'); return; }
 
     showLoading(true);
     if (id) {
       const old = allFolders.find(f => f.id === id);
-      const { error } = await sb.from('doc_folders').update({ name, icon, color }).eq('id', id);
+      const { error } = await sb.from('doc_folders').update({ name, icon, color, parent_id: parentId }).eq('id', id);
       if (!error && old && old.name !== name) {
         await sb.from('documents').update({ category: name }).eq('category', old.name);
       }
@@ -474,7 +523,7 @@
       if (error) { showToast('Lỗi: '+error.message,'danger'); return; }
       showToast('Đã cập nhật thư mục','success');
     } else {
-      const { error } = await sb.from('doc_folders').insert({ name, icon, color, sort_order: allFolders.length + 1 });
+      const { error } = await sb.from('doc_folders').insert({ name, icon, color, parent_id: parentId, sort_order: allFolders.length + 1 });
       showLoading(false);
       if (error) { showToast('Lỗi: '+error.message,'danger'); return; }
       showToast('Đã thêm thư mục mới','success');
@@ -490,6 +539,7 @@
     if (!f) return;
     const count = allDocs.filter(d => d.category === f.name).length;
     if (count > 0) { showToast(`Không thể xóa: còn ${count} tài liệu trong thư mục này. Hãy chuyển/xóa tài liệu đó trước.`,'warning'); return; }
+    if (allFolders.some(x => x.parent_id === id)) { showToast('Không thể xóa: thư mục này còn thư mục con bên trong. Hãy xóa (hoặc chuyển) thư mục con trước.','warning'); return; }
     if (!confirm(`Xóa thư mục "${f.name}"?`)) return;
     const { error } = await sb.from('doc_folders').delete().eq('id', id);
     if (error) { showToast('Xóa thất bại','danger'); return; }

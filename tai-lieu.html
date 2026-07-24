@@ -136,6 +136,33 @@
     render();
   }
 
+  // Thư mục con: đếm/gom tài liệu đệ quy xuống các thư mục con
+  function childFolders(id) {
+    return allFolders.filter(f => f.parent_id === id);
+  }
+
+  function countDocsRecursive(folder) {
+    let count = allDocs.filter(d => d.category === folder.name).length;
+    childFolders(folder.id).forEach(c => { count += countDocsRecursive(c); });
+    return count;
+  }
+
+  function collectDocsRecursive(folder) {
+    let docs = allDocs.filter(d => d.category === folder.name);
+    childFolders(folder.id).forEach(c => { docs = docs.concat(collectDocsRecursive(c)); });
+    return docs;
+  }
+
+  function folderChain(folder) {
+    const chain = [];
+    let cur = folder;
+    while (cur) {
+      chain.unshift(cur);
+      cur = cur.parent_id ? allFolders.find(f => f.id === cur.parent_id) : null;
+    }
+    return chain;
+  }
+
   function setViewMode(mode) {
     viewMode = mode;
     localStorage.setItem('docViewMode', mode);
@@ -159,7 +186,7 @@
     if (curFolder) {
       const list = allDocs.filter(d => d.category === curFolder.name);
       renderHeader('folder', list.length);
-      renderDocList(list);
+      renderFolderContents(list);
       return;
     }
 
@@ -169,10 +196,18 @@
 
   function renderHeader(mode, count) {
     const row = document.getElementById('headerRow');
-    const crumb = `<div class="doc-breadcrumb"><i class="bi bi-folder2-open"></i><a href="#" onclick="backToFolders();return false">Tài liệu</a>`
-      + (mode === 'folder' ? ` <i class="bi bi-chevron-right" style="font-size:.7rem"></i> <span class="text-body fw-semibold">${folderMeta(curFolder.name).icon||''} ${escHtml(curFolder.name)}</span>` : '')
-      + (mode === 'search' ? ` <i class="bi bi-chevron-right" style="font-size:.7rem"></i> <span class="text-body fw-semibold">Kết quả tìm kiếm</span>` : '')
-      + `</div>`;
+    let crumb = `<div class="doc-breadcrumb"><i class="bi bi-folder2-open"></i><a href="#" onclick="backToFolders();return false">Tài liệu</a>`;
+    if (mode === 'folder') {
+      const chain = folderChain(curFolder);
+      chain.forEach((f, idx) => {
+        crumb += ` <i class="bi bi-chevron-right" style="font-size:.7rem"></i> `;
+        crumb += (idx === chain.length - 1)
+          ? `<span class="text-body fw-semibold">${f.icon||''} ${escHtml(f.name)}</span>`
+          : `<a href="#" onclick="openFolder('${f.id}');return false">${f.icon||''} ${escHtml(f.name)}</a>`;
+      });
+    }
+    if (mode === 'search') crumb += ` <i class="bi bi-chevron-right" style="font-size:.7rem"></i> <span class="text-body fw-semibold">Kết quả tìm kiếm</span>`;
+    crumb += `</div>`;
 
     let toolbar = '';
     if (mode === 'folder') {
@@ -187,39 +222,61 @@
     row.innerHTML = crumb + toolbar;
   }
 
+  // Thẻ thư mục: dùng <div role="button"> thay vì <button> lồng <button>
+  // (nút "tải tất cả" bên trong) vì HTML không cho phép button lồng button —
+  // trình duyệt sẽ tự đóng button ngoài sớm, làm vỡ layout (tên/số lượng bị đẩy ra ngoài thẻ).
+  function folderCardHtml(f, i) {
+    const count = countDocsRecursive(f);
+    return `<div class="col-md-6 col-lg-4 fade-up" style="animation-delay:${i*0.04}s">
+      <div class="folder-card w-100" role="button" tabindex="0"
+           onclick="openFolder('${f.id}')"
+           onkeydown="if((event.key==='Enter'||event.key===' ')&&event.target===this){event.preventDefault();openFolder('${f.id}')}">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="folder-icon-box" style="background:${f.color}">${f.icon}</div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" title="Tải tất cả thư mục này" onclick="event.stopPropagation();downloadFolderZip('${f.id}')"><i class="bi bi-file-earmark-zip"></i></button>
+        </div>
+        <div class="folder-name">${escHtml(f.name)}</div>
+        <div class="folder-count">${count} tài liệu</div>
+      </div>
+    </div>`;
+  }
+
   function renderFolderGrid() {
     document.getElementById('docCount').textContent = allDocs.length;
     const el = document.getElementById('docList');
-    if (!allFolders.length) {
+    const topFolders = allFolders.filter(f => !f.parent_id);
+    if (!topFolders.length) {
       el.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-folder2-open"></i><p class="mt-2">Chưa có thư mục nào.</p></div>';
       return;
     }
-    el.innerHTML = allFolders.map((f,i) => {
-      const count = allDocs.filter(d => d.category === f.name).length;
-      return `<div class="col-md-6 col-lg-4 fade-up" style="animation-delay:${i*0.04}s">
-        <button type="button" class="folder-card w-100 border-0" onclick="openFolder('${f.id}')">
-          <div class="d-flex align-items-center justify-content-between">
-            <div class="folder-icon-box" style="background:${f.color}">${f.icon}</div>
-            <button type="button" class="btn btn-sm btn-outline-secondary" title="Tải tất cả thư mục này" onclick="event.stopPropagation();downloadFolderZip('${f.id}')"><i class="bi bi-file-earmark-zip"></i></button>
-          </div>
-          <div class="folder-name">${escHtml(f.name)}</div>
-          <div class="folder-count">${count} tài liệu</div>
-        </button>
-      </div>`;
-    }).join('');
+    el.innerHTML = topFolders.map((f,i) => folderCardHtml(f,i)).join('');
   }
 
-  function renderDocList(docs) {
-    document.getElementById('docCount').textContent = docs.length;
+  // Trong 1 thư mục: hiện thư mục con (nếu có) rồi đến tài liệu nằm trực tiếp trong thư mục này
+  function renderFolderContents(list) {
+    const subfolders = childFolders(curFolder.id);
+    const total = list.length + subfolders.reduce((s,f) => s + countDocsRecursive(f), 0);
+    document.getElementById('docCount').textContent = total;
     const el = document.getElementById('docList');
-    if (!docs.length) {
-      el.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-folder2-open"></i><p class="mt-2">Không tìm thấy tài liệu nào.</p></div>';
+
+    if (!subfolders.length && !list.length) {
+      el.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-folder2-open"></i><p class="mt-2">Thư mục này chưa có tài liệu nào.</p></div>';
       return;
     }
+
+    let html = subfolders.map((f,i) => folderCardHtml(f,i)).join('');
+    if (list.length) {
+      if (subfolders.length) html += `<div class="col-12 mt-2 mb-1 text-muted fw-semibold" style="font-size:.85rem"><i class="bi bi-file-earmark-text me-1"></i>Tài liệu trong thư mục này</div>`;
+      html += docListHtml(list);
+    }
+    el.innerHTML = html;
+  }
+
+  function docListHtml(docs) {
     const isList = viewMode === 'list';
     const colClass = isList ? 'col-12' : 'col-md-6 col-lg-4';
     const cardClass = isList ? 'doc-card doc-card-list' : 'doc-card';
-    el.innerHTML = docs.map((d,i) => {
+    return docs.map((d,i) => {
       const m = folderMeta(d.category);
       return `<div class="${colClass} fade-up" style="animation-delay:${i*0.04}s">
         <div class="${cardClass}">
@@ -247,6 +304,16 @@
     }).join('');
   }
 
+  function renderDocList(docs) {
+    document.getElementById('docCount').textContent = docs.length;
+    const el = document.getElementById('docList');
+    if (!docs.length) {
+      el.innerHTML = '<div class="col-12 empty-state"><i class="bi bi-folder2-open"></i><p class="mt-2">Không tìm thấy tài liệu nào.</p></div>';
+      return;
+    }
+    el.innerHTML = docListHtml(docs);
+  }
+
   async function trackDl(id) {
     await sb.rpc('increment_download', { doc_id: id });
     const d = allDocs.find(x=>x.id===id);
@@ -256,7 +323,7 @@
   async function downloadFolderZip(id) {
     const folder = allFolders.find(f => f.id === id);
     if (!folder) return;
-    const docs = allDocs.filter(d => d.category === folder.name);
+    const docs = collectDocsRecursive(folder);
     if (!docs.length) { showToast('Thư mục này chưa có tài liệu nào.','warning'); return; }
 
     const btn = document.getElementById('dlAllBtn');

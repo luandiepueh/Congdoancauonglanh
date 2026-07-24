@@ -30,7 +30,9 @@ congdoan-supabase/
 ├── _headers                # Security headers cho Cloudflare Pages
 ├── setup.sql               # Schema gốc (đã chạy 1 lần)
 ├── setup_admin_profiles.sql # Thêm bảng admin_profiles (đã chạy)
-└── setup_activities.sql    # Thêm bảng activities cho ảnh hoạt động (chạy 1 lần khi triển khai)
+├── setup_activities.sql    # Thêm bảng activities cho ảnh hoạt động (chạy 1 lần khi triển khai)
+├── setup_doc_folders.sql   # Bảng doc_folders — thư mục tài liệu tự tạo (đã chạy)
+└── setup_doc_folders_nested.sql # Thêm parent_id vào doc_folders — thư mục con (chạy 1 lần khi triển khai)
 ```
 
 ## Supabase
