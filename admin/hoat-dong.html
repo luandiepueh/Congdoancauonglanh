@@ -89,16 +89,14 @@
           </div>
         </div>
         <div class="mb-3">
-          <label class="form-label" for="fDesc">Mô tả ngắn</label>
-          <textarea class="form-control" id="fDesc" rows="3" placeholder="Mô tả ngắn về hoạt động..." style="resize:vertical"></textarea>
+          <label class="form-label" for="fDesc">Nội dung bài viết</label>
+          <textarea class="form-control" id="fDesc" rows="6" placeholder="Viết nội dung bài đăng về hoạt động... (giữ nguyên xuống dòng khi hiển thị)" style="resize:vertical"></textarea>
         </div>
         <div class="mb-1">
           <label class="form-label" for="fImage">Hình ảnh <span class="text-danger">*</span></label>
-          <input type="file" class="form-control" id="fImage" accept="image/png,image/jpeg,image/webp,image/gif">
-          <small class="text-muted">JPG, PNG, WebP — tối đa 10MB. Để trống nếu chỉ sửa thông tin.</small>
-          <div id="currentImgWrap" class="mt-2 d-none">
-            <img id="currentImgPreview" src="" alt="Hình hiện tại" style="max-width:160px;border-radius:8px;border:1px solid var(--glass-border)">
-          </div>
+          <input type="file" class="form-control" id="fImage" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+          <small class="text-muted">Chọn được nhiều ảnh cùng lúc (JPG, PNG, WebP — tối đa 10MB/ảnh, ảnh lớn sẽ tự nén bớt). Có thể bấm chọn thêm nhiều lần.</small>
+          <div id="imgPreviewWrap" class="d-flex flex-wrap gap-2 mt-2"></div>
         </div>
       </div>
       <div class="modal-footer border-0">
@@ -116,6 +114,8 @@
 <script src="../js/config.js"></script>
 <script>
   let allActs = [];
+  let existingImages = []; // ảnh đã có sẵn (khi sửa) — URL string
+  let pendingFiles   = []; // ảnh mới chọn, chưa upload — File object
   const modal = new bootstrap.Modal(document.getElementById('actModal'));
 
   (async () => {
@@ -124,6 +124,49 @@
     document.getElementById('sbOrg').textContent = APP_CONFIG.orgName;
     loadActs();
   })();
+
+  document.getElementById('fImage').addEventListener('change', (e) => {
+    pendingFiles.push(...Array.from(e.target.files));
+    e.target.value = ''; // cho phép chọn lại cùng file / chọn thêm đợt khác
+    renderImgPreviews();
+  });
+
+  function renderImgPreviews() {
+    const wrap = document.getElementById('imgPreviewWrap');
+    const existingHtml = existingImages.map((url, i) => `
+      <div class="position-relative">
+        <img src="${escHtml(url)}" alt="" style="width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--glass-border)">
+        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 p-0" style="width:20px;height:20px;line-height:1;border-radius:50%;transform:translate(30%,-30%)" onclick="removeExistingImg(${i})" aria-label="Xóa ảnh này"><i class="bi bi-x"></i></button>
+      </div>`).join('');
+    const pendingHtml = pendingFiles.map((file, i) => `
+      <div class="position-relative">
+        <img src="${URL.createObjectURL(file)}" alt="" style="width:84px;height:84px;object-fit:cover;border-radius:8px;border:2px solid var(--primary)">
+        <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 p-0" style="width:20px;height:20px;line-height:1;border-radius:50%;transform:translate(30%,-30%)" onclick="removePendingImg(${i})" aria-label="Xóa ảnh này"><i class="bi bi-x"></i></button>
+      </div>`).join('');
+    wrap.innerHTML = existingHtml + pendingHtml;
+  }
+
+  function removeExistingImg(i) { existingImages.splice(i, 1); renderImgPreviews(); }
+  function removePendingImg(i)  { pendingFiles.splice(i, 1); renderImgPreviews(); }
+
+  // Nén/resize ảnh phía trình duyệt trước khi upload — giảm dung lượng Storage (gói Free có hạn mức)
+  async function compressImage(file, maxDim = 1920, quality = 0.82) {
+    if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+    try {
+      const bitmap = await createImageBitmap(file);
+      let { width, height } = bitmap;
+      if (width <= maxDim && height <= maxDim) return file;
+      const scale = maxDim / Math.max(width, height);
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, width, height);
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+      if (!blob || blob.size >= file.size) return file;
+      return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' });
+    } catch (_) { return file; }
+  }
 
   async function loadActs() {
     const { data } = await sb.from('activities').select('*').order('event_date', { ascending: false });
@@ -147,7 +190,8 @@
             <button type="button" class="btn btn-sm btn-light" onclick="editActivity('${a.id}')" aria-label="Sửa hoạt động"><i class="bi bi-pencil"></i></button>
             <button type="button" class="btn btn-sm btn-light text-danger" onclick="delActivity('${a.id}')" aria-label="Xóa hoạt động"><i class="bi bi-trash"></i></button>
           </div>
-          <img class="gallery-thumb" src="${escHtml(a.image_url)}" alt="">
+          <img class="gallery-thumb" src="${escHtml(a.image_urls?.[0])}" alt="">
+          ${a.image_urls?.length > 1 ? `<span class="badge bg-dark bg-opacity-75 position-absolute" style="top:.5rem;left:.5rem;font-size:.72rem"><i class="bi bi-images me-1"></i>${a.image_urls.length}</span>` : ''}
           <div class="gallery-body">
             <div class="gallery-title">${escHtml(a.title)}</div>
             <div class="gallery-date"><i class="bi bi-calendar3"></i>${fmtDate(a.event_date)}</div>
@@ -162,13 +206,9 @@
     document.getElementById('fDate').value   = a?.event_date || new Date().toISOString().slice(0,10);
     document.getElementById('fDesc').value   = a?.description || '';
     document.getElementById('fImage').value  = '';
-    const imgWrap = document.getElementById('currentImgWrap');
-    if (a?.image_url) {
-      document.getElementById('currentImgPreview').src = a.image_url;
-      imgWrap.classList.remove('d-none');
-    } else {
-      imgWrap.classList.add('d-none');
-    }
+    existingImages = a?.image_urls ? [...a.image_urls] : [];
+    pendingFiles = [];
+    renderImgPreviews();
     document.getElementById('modalTitle').textContent = a ? 'Chỉnh sửa hoạt động' : 'Thêm hoạt động mới';
     document.getElementById('saveBtnTxt').textContent = a ? 'Lưu thay đổi' : 'Thêm hoạt động';
     modal.show();
@@ -189,25 +229,25 @@
     const title   = document.getElementById('fTitle').value.trim();
     const date    = document.getElementById('fDate').value || null;
     const desc    = document.getElementById('fDesc').value.trim();
-    const file    = document.getElementById('fImage').files[0];
     const editId  = document.getElementById('editId').value;
-    const existing = editId ? allActs.find(a => a.id === editId) : null;
 
     if (!title) { showToast('Vui lòng nhập tiêu đề','danger'); return; }
-    if (!editId && !file) { showToast('Vui lòng chọn hình ảnh','danger'); return; }
+    if (!existingImages.length && !pendingFiles.length) { showToast('Vui lòng chọn ít nhất 1 hình ảnh','danger'); return; }
 
     showLoading(true);
-    let image_url = existing?.image_url || '';
 
-    if (file) {
+    const uploadedUrls = [];
+    for (const rawFile of pendingFiles) {
+      const file = await compressImage(rawFile);
       const path = `activities/${Date.now()}_${sanitizePath(file.name)}`;
       const { error: upErr } = await sb.storage.from('attachments').upload(path, file, { contentType: file.type });
       if (upErr) { showLoading(false); showToast('Upload ảnh thất bại: '+upErr.message,'danger'); return; }
       const { data: urlData } = sb.storage.from('attachments').getPublicUrl(path);
-      image_url = urlData.publicUrl;
+      uploadedUrls.push(urlData.publicUrl);
     }
 
-    const payload = { title, description: desc, image_url, event_date: date };
+    const image_urls = [...existingImages, ...uploadedUrls];
+    const payload = { title, description: desc, image_urls, event_date: date };
     let error;
     if (editId) {
       ({ error } = await sb.from('activities').update(payload).eq('id', editId));

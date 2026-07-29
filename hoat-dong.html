@@ -94,7 +94,16 @@
       </div>
       <div class="modal-body a4-modal-bg">
         <div class="a4-page">
-          <img id="actModalImg" src="" alt="" class="gallery-lightbox-img mb-3">
+          <div id="actModalCarousel" class="carousel slide mb-3" data-bs-ride="false">
+            <div class="carousel-inner" id="actModalCarouselInner"></div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#actModalCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#actModalCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon"></span>
+            </button>
+            <div class="carousel-indicators" id="actModalCarouselDots" style="position:static;margin:.6rem 0 0"></div>
+          </div>
           <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
             <small class="text-muted"><i class="bi bi-calendar3 me-1"></i><span id="actModalDate"></span></small>
           </div>
@@ -153,7 +162,8 @@
     el.innerHTML = acts.map((a,i) => `
       <div class="col-6 col-md-4 col-lg-3 fade-up" style="animation-delay:${i*0.04}s">
         <button type="button" class="gallery-card" onclick="openAct('${a.id}')" aria-label="Xem hoạt động: ${escHtml(a.title)}">
-          <img class="gallery-thumb" src="${escHtml(a.image_url)}" alt="" loading="lazy">
+          <img class="gallery-thumb" src="${escHtml(a.image_urls?.[0])}" alt="" loading="lazy">
+          ${a.image_urls?.length > 1 ? `<span class="badge bg-dark bg-opacity-75 position-absolute" style="top:.5rem;left:.5rem;font-size:.72rem"><i class="bi bi-images me-1"></i>${a.image_urls.length}</span>` : ''}
           <div class="gallery-body">
             <div class="gallery-title">${escHtml(a.title)}</div>
             <div class="gallery-date"><i class="bi bi-calendar3"></i>${fmtDate(a.event_date)}</div>
@@ -165,8 +175,17 @@
   function openAct(id) {
     const a = allActs.find(x => x.id === id);
     if (!a) return;
-    document.getElementById('actModalImg').src = a.image_url;
-    document.getElementById('actModalImg').alt = a.title;
+    const images = a.image_urls?.length ? a.image_urls : [];
+    document.getElementById('actModalCarouselInner').innerHTML = images.map((url, i) => `
+      <div class="carousel-item ${i===0?'active':''}">
+        <img src="${escHtml(url)}" alt="${escHtml(a.title)} - ảnh ${i+1}" class="gallery-lightbox-img">
+      </div>`).join('');
+    const multi = images.length > 1;
+    document.getElementById('actModalCarousel').querySelector('.carousel-control-prev').classList.toggle('d-none', !multi);
+    document.getElementById('actModalCarousel').querySelector('.carousel-control-next').classList.toggle('d-none', !multi);
+    document.getElementById('actModalCarouselDots').innerHTML = multi
+      ? images.map((_, i) => `<button type="button" data-bs-target="#actModalCarousel" data-bs-slide-to="${i}" class="${i===0?'active':''}" aria-label="Ảnh ${i+1}"></button>`).join('')
+      : '';
     document.getElementById('actModalTitle').textContent = a.title;
     document.getElementById('actModalDate').textContent = fmtDate(a.event_date);
     document.getElementById('actModalDesc').textContent = a.description || '';

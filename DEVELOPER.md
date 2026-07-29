@@ -31,6 +31,7 @@ congdoan-supabase/
 ├── setup.sql               # Schema gốc (đã chạy 1 lần)
 ├── setup_admin_profiles.sql # Thêm bảng admin_profiles (đã chạy)
 ├── setup_activities.sql    # Thêm bảng activities cho ảnh hoạt động (chạy 1 lần khi triển khai)
+├── migrate_activities_multi_image.sql # Nâng cấp activities: image_url (1 ảnh) → image_urls (nhiều ảnh)
 ├── setup_doc_folders.sql   # Bảng doc_folders — thư mục tài liệu tự tạo (đã chạy)
 └── setup_doc_folders_nested.sql # Thêm parent_id vào doc_folders — thư mục con (chạy 1 lần khi triển khai)
 ```
@@ -38,8 +39,9 @@ congdoan-supabase/
 ## Supabase
 - **Project URL:** https://adcqrxupqlluqyffsykw.supabase.co
 - **Config:** `js/config.js` — chứa SUPABASE_URL, SUPABASE_ANON_KEY, APP_CONFIG
-- **Tables:** `announcements`, `documents`, `feedback`, `admin_profiles`, `activities`
-- **Storage buckets:** `tai-lieu` (50MB, Office/PDF), `attachments` (10MB, mọi loại — cũng dùng cho ảnh hoạt động, path `activities/...`)
+- **Tables:** `announcements`, `documents`, `feedback`, `admin_profiles`, `activities` (cột `image_urls` là mảng TEXT[] — 1 hoạt động có thể có nhiều ảnh)
+- **Storage buckets:** `tai-lieu` (50MB, Office/PDF), `attachments` (10MB/ảnh, mọi loại — cũng dùng cho ảnh hoạt động, path `activities/...`)
+- **Free tier:** Supabase Free ~1GB storage + ~5GB băng thông/tháng. Trang quản lý hoạt động tự nén/resize ảnh (canvas, tối đa cạnh dài 1920px, JPEG q=0.82) trước khi upload để tiết kiệm hạn mức khi đăng nhiều ảnh/bài.
 - **Auth:** Email + Password. Mọi `authenticated` user đều có quyền ghi.
 
 ### Bảng admin_profiles

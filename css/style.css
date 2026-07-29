@@ -380,6 +380,7 @@ a.text-muted:hover { color: var(--primary) !important; }
 
 /* ===== ACTIVITIES GALLERY (Hình ảnh hoạt động) ===== */
 .gallery-card {
+  position: relative;
   background: #fff; border: 1px solid var(--glass-border); border-radius: var(--r-md);
   overflow: hidden; box-shadow: var(--card-shadow);
   transition: transform .25s, box-shadow .25s;
@@ -855,6 +856,7 @@ a.text-muted:hover { color: var(--primary) !important; }
 .a4-divider { border-color: rgba(37,99,235,.15); margin: .9rem 0 1.4rem; }
 .a4-content {
   line-height: 1.85; color: var(--text); font-size: .95rem;
+  white-space: pre-line;
 }
 .a4-content img {
   max-width: 100% !important; height: auto !important;

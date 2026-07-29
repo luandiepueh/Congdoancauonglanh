@@ -380,7 +380,7 @@
     el.innerHTML = acts.map((a,i) => `
       <div class="col-6 col-md-3 fade-up" style="animation-delay:${i*0.05}s">
         <a href="hoat-dong.html" class="gallery-card">
-          <img class="gallery-thumb" src="${escHtml(a.image_url)}" alt="" loading="lazy">
+          <img class="gallery-thumb" src="${escHtml(a.image_urls?.[0])}" alt="" loading="lazy">
           <div class="gallery-body">
             <div class="gallery-title">${escHtml(a.title)}</div>
             <div class="gallery-date"><i class="bi bi-calendar3"></i>${fmtDate(a.event_date)}</div>
