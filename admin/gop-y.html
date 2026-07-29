@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản lý Góp ý - Công Đoàn</title>
+  <link rel="icon" type="image/png" href="../images/logo-congdoan-transparent.png">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="../css/style.css">
@@ -29,6 +30,8 @@
       <a href="thong-bao.html" class="admin-nav-link"><i class="bi bi-megaphone-fill"></i>Thông báo</a>
       <a href="tai-lieu.html"  class="admin-nav-link"><i class="bi bi-folder2-open"></i>Tài liệu</a>
       <a href="hoat-dong.html" class="admin-nav-link"><i class="bi bi-images"></i>Hoạt động</a>
+      <a href="gioi-thieu.html" class="admin-nav-link"><i class="bi bi-info-circle-fill"></i>Giới thiệu &amp; BCH</a>
+      <a href="quyen-loi.html"  class="admin-nav-link"><i class="bi bi-gift-fill"></i>Quyền lợi đoàn viên</a>
       <a href="gop-y.html"     class="admin-nav-link active"><i class="bi bi-chat-left-dots-fill"></i>Góp ý</a>
       <div class="nav-section-label">Hệ thống</div>
       <a href="quan-tri-vien.html" class="admin-nav-link"><i class="bi bi-person-gear"></i>Quản trị viên</a>
@@ -142,7 +145,7 @@
     const q = document.getElementById('searchBox').value.toLowerCase();
     const list = allFb.filter(f => {
       const matchS = !curStatus || f.status === curStatus;
-      const matchQ = !q || f.sender_name.toLowerCase().includes(q) || f.content.toLowerCase().includes(q) || (f.unit||'').toLowerCase().includes(q);
+      const matchQ = !q || f.sender_name.toLowerCase().includes(q) || f.content.toLowerCase().includes(q) || (f.unit||'').toLowerCase().includes(q) || (f.lookup_code||'').toLowerCase().includes(q);
       return matchS && matchQ;
     });
     document.getElementById('fbCount').textContent = list.length;
@@ -158,6 +161,7 @@
             <span class="fw-semibold">${escHtml(f.sender_name)}</span>
             ${f.unit ? `<span class="text-muted ms-1" style="font-size:.83rem">— ${escHtml(f.unit)}</span>` : ''}
             <span class="badge text-bg-light border ms-2" style="font-size:.72rem">${escHtml(f.category)}</span>
+            <span class="badge text-bg-light border ms-1 font-monospace" style="font-size:.72rem" title="Mã tra cứu">#${escHtml(f.lookup_code)}</span>
           </div>
           <div class="d-flex align-items-center gap-2">
             ${f.status==='Đã phản hồi'

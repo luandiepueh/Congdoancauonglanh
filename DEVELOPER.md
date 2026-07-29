@@ -11,16 +11,20 @@
 ```
 congdoan-supabase/
 ├── index.html              # Trang chủ công khai
+├── gioi-thieu.html         # Giới thiệu + Ban Chấp hành công khai
 ├── thong-bao.html          # Trang thông báo công khai
 ├── tai-lieu.html           # Trang tài liệu công khai
 ├── hoat-dong.html          # Thư viện ảnh hoạt động công khai
-├── gop-y.html              # Form góp ý công khai
+├── quyen-loi.html          # Quyền lợi đoàn viên công khai
+├── gop-y.html              # Form góp ý công khai (tra cứu bằng mã riêng)
 ├── admin/
 │   ├── login.html          # Đăng nhập admin
 │   ├── index.html          # Dashboard admin
 │   ├── thong-bao.html      # Quản lý thông báo (Quill editor)
 │   ├── tai-lieu.html       # Quản lý tài liệu
 │   ├── hoat-dong.html      # Quản lý hình ảnh hoạt động
+│   ├── gioi-thieu.html     # Quản lý nội dung giới thiệu + Ban Chấp hành
+│   ├── quyen-loi.html      # Quản lý quyền lợi đoàn viên
 │   ├── gop-y.html          # Quản lý + phản hồi góp ý
 │   └── quan-tri-vien.html  # Quản lý tài khoản admin
 ├── js/
@@ -33,13 +37,18 @@ congdoan-supabase/
 ├── setup_activities.sql    # Thêm bảng activities cho ảnh hoạt động (chạy 1 lần khi triển khai)
 ├── migrate_activities_multi_image.sql # Nâng cấp activities: image_url (1 ảnh) → image_urls (nhiều ảnh)
 ├── setup_doc_folders.sql   # Bảng doc_folders — thư mục tài liệu tự tạo (đã chạy)
-└── setup_doc_folders_nested.sql # Thêm parent_id vào doc_folders — thư mục con (chạy 1 lần khi triển khai)
+├── setup_doc_folders_nested.sql # Thêm parent_id vào doc_folders — thư mục con (chạy 1 lần khi triển khai)
+├── setup_leaders.sql       # Bảng org_profile + leaders (Giới thiệu/BCH) — chạy 1 lần khi triển khai
+├── setup_benefits.sql      # Bảng benefits (Quyền lợi đoàn viên) + dữ liệu mẫu — chạy 1 lần khi triển khai
+└── migrate_feedback_privacy.sql # Đóng lỗ hổng đọc toàn bộ feedback qua anon key + thêm mã tra cứu riêng — chạy 1 lần
 ```
+
+> ⚠️ **Các file `setup_*.sql` / `migrate_*.sql` chỉ có tác dụng sau khi được chạy tay 1 lần trong Supabase SQL Editor** (Dashboard → SQL Editor → dán nội dung file → Run). Claude/AI không có quyền thực thi DDL trên Supabase (chỉ có anon key phía client, không có service role key hay kết nối Postgres trực tiếp) — mọi thay đổi schema đều cần chạy thủ công.
 
 ## Supabase
 - **Project URL:** https://adcqrxupqlluqyffsykw.supabase.co
 - **Config:** `js/config.js` — chứa SUPABASE_URL, SUPABASE_ANON_KEY, APP_CONFIG
-- **Tables:** `announcements`, `documents`, `feedback`, `admin_profiles`, `activities` (cột `image_urls` là mảng TEXT[] — 1 hoạt động có thể có nhiều ảnh)
+- **Tables:** `announcements`, `documents`, `feedback` (có `lookup_code` — tra cứu công khai qua RPC `get_feedback_by_code`, KHÔNG có policy đọc trực tiếp cho anon), `admin_profiles`, `activities` (cột `image_urls` là mảng TEXT[] — 1 hoạt động có thể có nhiều ảnh), `org_profile` (1 dòng, nội dung giới thiệu chung), `leaders` (Ban Chấp hành), `benefits` (quyền lợi đoàn viên)
 - **Storage buckets:** `tai-lieu` (50MB, Office/PDF), `attachments` (10MB/ảnh, mọi loại — cũng dùng cho ảnh hoạt động, path `activities/...`)
 - **Free tier:** Supabase Free ~1GB storage + ~5GB băng thông/tháng. Trang quản lý hoạt động tự nén/resize ảnh (canvas, tối đa cạnh dài 1920px, JPEG q=0.82) trước khi upload để tiết kiệm hạn mức khi đăng nhiều ảnh/bài.
 - **Auth:** Email + Password. Mọi `authenticated` user đều có quyền ghi.

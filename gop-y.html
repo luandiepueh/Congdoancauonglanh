@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Góp ý & Phản hồi - Công Đoàn Cơ Sở</title>
+  <meta name="description" content="Gửi góp ý, kiến nghị đến Ban thường trực Công đoàn Phường Cầu Ông Lãnh và tra cứu phản hồi bằng mã riêng.">
+  <link rel="icon" type="image/png" href="images/logo-congdoan-transparent.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Góp ý & Phản hồi - Công Đoàn Cơ Sở">
+  <meta property="og:description" content="Gửi góp ý, kiến nghị đến Ban thường trực và tra cứu phản hồi.">
+  <meta property="og:image" content="https://congdoancauonglanh.pages.dev/images/logo-congdoan.png">
+  <meta name="twitter:card" content="summary">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="css/style.css">
@@ -34,11 +41,13 @@
       </div>
     </div>
     <ul class="navbar-nav nav-links-row">
-      <li><a href="index.html"     class="nav-link nav-pill">Trang chủ</a></li>
-      <li><a href="thong-bao.html" class="nav-link nav-pill">Thông báo</a></li>
-      <li><a href="tai-lieu.html"  class="nav-link nav-pill">Tài liệu</a></li>
-      <li><a href="hoat-dong.html" class="nav-link nav-pill">Hoạt động</a></li>
-      <li><a href="gop-y.html"     class="nav-link nav-pill active">Góp ý</a></li>
+      <li><a href="index.html"      class="nav-link nav-pill">Trang chủ</a></li>
+      <li><a href="gioi-thieu.html" class="nav-link nav-pill">Giới thiệu</a></li>
+      <li><a href="thong-bao.html"  class="nav-link nav-pill">Thông báo</a></li>
+      <li><a href="tai-lieu.html"   class="nav-link nav-pill">Tài liệu</a></li>
+      <li><a href="hoat-dong.html"  class="nav-link nav-pill">Hoạt động</a></li>
+      <li><a href="quyen-loi.html"  class="nav-link nav-pill">Quyền lợi</a></li>
+      <li><a href="gop-y.html"      class="nav-link nav-pill active">Góp ý</a></li>
       <li id="adminNav" class="d-none">
         <a href="admin/index.html" class="nav-link nav-pill admin-link"><i class="bi bi-shield-lock me-1"></i>Quản trị</a>
       </li>
@@ -103,8 +112,8 @@
         <div id="formWrap">
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label" for="fName">Họ và tên <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="fName" placeholder="Nguyễn Văn A" required>
+              <label class="form-label" for="fName">Họ và tên</label>
+              <input type="text" class="form-control" id="fName" placeholder="Để trống nếu muốn gửi ẩn danh">
             </div>
             <div class="col-md-6">
               <label class="form-label" for="fUnit">Đơn vị / Tổ công đoàn</label>
@@ -140,8 +149,12 @@
             <i class="bi bi-check-circle-fill"></i>
           </div>
           <h5 class="fw-bold text-success">Đã gửi thành công!</h5>
-          <p class="text-muted mb-3">Ban thường trực sẽ xem xét và phản hồi sớm nhất có thể.</p>
-          <p class="text-muted" style="font-size:.85rem">Để theo dõi trạng thái, nhập tên của bạn vào ô <strong>"Tra cứu trạng thái"</strong> bên phải.</p>
+          <p class="text-muted mb-2">Ban thường trực sẽ xem xét và phản hồi sớm nhất có thể.</p>
+          <div class="d-inline-block mb-3 px-4 py-2" style="background:#fff5f5;border:2px dashed var(--primary,#b71c1c);border-radius:10px">
+            <div class="text-muted" style="font-size:.78rem">Mã tra cứu của bạn</div>
+            <div class="fw-bold" style="font-size:1.6rem;letter-spacing:.15em;color:var(--primary,#b71c1c)" id="newLookupCode">------</div>
+          </div>
+          <p class="text-muted" style="font-size:.85rem"><i class="bi bi-shield-lock me-1"></i>Vui lòng <strong>lưu lại mã này</strong> — đây là cách duy nhất để tra cứu phản hồi sau này (không dùng tên, để bảo mật thông tin của bạn).</p>
           <button class="btn btn-outline-danger btn-sm" onclick="resetForm()"><i class="bi bi-plus-circle me-1"></i>Gửi thêm</button>
         </div>
 
@@ -152,10 +165,10 @@
     <div class="col-lg-5">
       <div class="form-section">
         <div class="form-section-title"><i class="bi bi-search me-2"></i>Tra cứu trạng thái</div>
-        <p class="text-muted" style="font-size:.85rem">Nhập họ tên đã gửi để xem tất cả góp ý và trạng thái phản hồi của bạn.</p>
+        <p class="text-muted" style="font-size:.85rem">Nhập <strong>mã tra cứu</strong> đã nhận được sau khi gửi để xem phản hồi.</p>
         <div class="input-group mb-3">
-          <label class="visually-hidden" for="searchName">Họ tên để tra cứu</label>
-          <input type="text" class="form-control" id="searchName" placeholder="Nhập họ tên...">
+          <label class="visually-hidden" for="searchCode">Mã tra cứu</label>
+          <input type="text" class="form-control" id="searchCode" placeholder="VD: 7K2X9P" maxlength="6" style="text-transform:uppercase;letter-spacing:.1em">
           <button class="btn btn-danger" onclick="lookup()" aria-label="Tra cứu"><i class="bi bi-search"></i></button>
         </div>
         <div id="lookupResult"></div>
@@ -167,7 +180,8 @@
         <ul class="list-unstyled" style="font-size:.85rem;color:#444">
           <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Phản hồi trong vòng <strong>3–5 ngày làm việc</strong></li>
           <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Nội dung được <strong>bảo mật</strong>, chỉ Ban thường trực xem</li>
-          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Tra cứu bằng <strong>tên đã gửi</strong> để xem phản hồi</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Có thể gửi <strong>ẩn danh</strong> — để trống họ tên</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Tra cứu bằng <strong>mã riêng</strong> nhận được sau khi gửi, không dùng tên</li>
         </ul>
       </div>
     </div>
@@ -178,11 +192,13 @@
 <footer class="site-footer py-4 mt-5">
   <div class="container text-center" style="font-size:.82rem;color:#999">
     <a href="index.html" class="text-muted text-decoration-none me-3"><i class="bi bi-house me-1"></i>Trang chủ</a>
+    <a href="gioi-thieu.html" class="text-muted text-decoration-none me-3"><i class="bi bi-info-circle me-1"></i>Giới thiệu</a>
     <a href="thong-bao.html" class="text-muted text-decoration-none me-3"><i class="bi bi-megaphone me-1"></i>Thông báo</a>
     <a href="hoat-dong.html" class="text-muted text-decoration-none me-3"><i class="bi bi-images me-1"></i>Hoạt động</a>
-    <a href="tai-lieu.html" class="text-muted text-decoration-none"><i class="bi bi-folder2-open me-1"></i>Tài liệu</a>
+    <a href="tai-lieu.html" class="text-muted text-decoration-none me-3"><i class="bi bi-folder2-open me-1"></i>Tài liệu</a>
+    <a href="quyen-loi.html" class="text-muted text-decoration-none"><i class="bi bi-gift me-1"></i>Quyền lợi</a>
     <hr style="border-color:#f0d0d0">
-    © 2026 Công Đoàn Cơ Sở.
+    © <span id="footYear"></span> Công Đoàn Cơ Sở.
   </div>
 </footer>
 
@@ -192,7 +208,15 @@
 <script>
   document.getElementById('topDate').textContent = new Date().toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
   document.getElementById('navOrg').textContent = APP_CONFIG.orgName;
+  document.getElementById('footYear').textContent = new Date().getFullYear();
   sb.auth.getSession().then(({data:{session}}) => { if(session) document.getElementById('adminNav').classList.remove('d-none'); });
+
+  function genLookupCode() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // bỏ ký tự dễ nhầm: I,O,0,1,L
+    let code = '';
+    for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    return code;
+  }
 
   async function submitFb() {
     const name    = document.getElementById('fName').value.trim();
@@ -200,19 +224,25 @@
     const cat     = document.getElementById('fCat').value;
     const content = document.getElementById('fContent').value.trim();
 
-    if (!name)    { showToast('Vui lòng nhập họ tên','danger'); document.getElementById('fName').focus(); return; }
     if (!cat)     { showToast('Vui lòng chọn phân loại','danger'); return; }
     if (!content) { showToast('Vui lòng nhập nội dung góp ý','danger'); document.getElementById('fContent').focus(); return; }
 
+    const lookupCode = genLookupCode();
     showLoading(true);
-    const { error } = await sb.from('feedback').insert({ sender_name: name, unit, category: cat, content });
+    const { error } = await sb.from('feedback').insert({
+      sender_name: name || 'Ẩn danh',
+      is_anonymous: !name,
+      unit, category: cat, content,
+      lookup_code: lookupCode
+    });
     showLoading(false);
 
     if (error) { showToast('Gửi thất bại: ' + error.message, 'danger'); return; }
 
     document.getElementById('formWrap').classList.add('d-none');
     document.getElementById('successWrap').classList.remove('d-none');
-    document.getElementById('searchName').value = name;
+    document.getElementById('newLookupCode').textContent = lookupCode;
+    document.getElementById('searchCode').value = lookupCode;
   }
 
   function resetForm() {
@@ -223,19 +253,16 @@
   }
 
   async function lookup() {
-    const name = document.getElementById('searchName').value.trim();
+    const code = document.getElementById('searchCode').value.trim().toUpperCase();
     const el   = document.getElementById('lookupResult');
-    if (!name) { el.innerHTML = '<p class="text-muted" style="font-size:.85rem">Vui lòng nhập tên để tra cứu.</p>'; return; }
+    if (!code) { el.innerHTML = '<p class="text-muted" style="font-size:.85rem">Vui lòng nhập mã tra cứu.</p>'; return; }
 
     el.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-danger"></div></div>';
 
-    const { data, error } = await sb.from('feedback')
-      .select('*')
-      .ilike('sender_name', `%${name}%`)
-      .order('created_at', { ascending: false });
+    const { data, error } = await sb.rpc('get_feedback_by_code', { p_code: code });
 
     if (error || !data?.length) {
-      el.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="bi bi-inbox" style="font-size:2.5rem;opacity:.4"></i><p class="mt-2 mb-0" style="font-size:.85rem">Không tìm thấy góp ý nào với tên này.</p></div>';
+      el.innerHTML = '<div class="empty-state" style="padding:1.5rem"><i class="bi bi-inbox" style="font-size:2.5rem;opacity:.4"></i><p class="mt-2 mb-0" style="font-size:.85rem">Không tìm thấy góp ý nào với mã này.</p></div>';
       return;
     }
 
@@ -263,7 +290,7 @@
   }
 
   // Allow Enter key to trigger lookup
-  document.getElementById('searchName').addEventListener('keypress', e => { if (e.key==='Enter') lookup(); });
+  document.getElementById('searchCode').addEventListener('keypress', e => { if (e.key==='Enter') lookup(); });
 </script>
 </body>
 </html>

@@ -378,6 +378,36 @@ a.text-muted:hover { color: var(--primary) !important; }
 .view-toggle-btn { border: 1.5px solid #ddd; background: #fff; color: var(--text-muted); }
 .view-toggle-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 
+/* ===== GIỚI THIỆU / BAN CHẤP HÀNH (leaders) ===== */
+.leader-card {
+  background: #fff; border: 1px solid var(--glass-border); border-radius: 16px;
+  padding: 1.4rem 1.1rem; text-align: center; box-shadow: var(--card-shadow);
+  transition: all .22s; height: 100%;
+}
+.leader-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(37,99,235,.14); }
+.leader-photo {
+  width: 96px; height: 96px; border-radius: 50%; object-fit: cover; margin: 0 auto .9rem; display: block;
+  box-shadow: 0 0 0 3px var(--primary,#b71c1c);
+}
+.leader-photo-placeholder {
+  width: 96px; height: 96px; border-radius: 50%; margin: 0 auto .9rem;
+  background: linear-gradient(135deg,#1e3a8a,var(--primary,#b71c1c));
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.7rem; font-weight: 700;
+}
+.leader-name { font-weight: 700; color: var(--text); font-size: .98rem; }
+.leader-role { color: var(--primary,#b71c1c); font-size: .82rem; font-weight: 600; margin-top: .2rem; }
+
+/* ===== QUYỀN LỢI ĐOÀN VIÊN (benefits) ===== */
+.benefit-card {
+  background: #fff; border: 1px solid var(--glass-border); border-radius: 16px;
+  padding: 1.5rem 1.3rem; transition: all .22s; box-shadow: var(--card-shadow);
+}
+.benefit-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(37,99,235,.14); }
+.benefit-icon {
+  width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; background: rgba(183,28,28,.1); color: var(--primary,#b71c1c); margin-bottom: 1rem;
+}
+
 /* ===== ACTIVITIES GALLERY (Hình ảnh hoạt động) ===== */
 .gallery-card {
   position: relative;
