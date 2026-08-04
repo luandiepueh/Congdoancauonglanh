@@ -39,6 +39,7 @@ congdoan-supabase/
 ├── setup_doc_folders.sql   # Bảng doc_folders — thư mục tài liệu tự tạo (đã chạy)
 ├── setup_doc_folders_nested.sql # Thêm parent_id vào doc_folders — thư mục con (chạy 1 lần khi triển khai)
 ├── setup_leaders.sql       # Bảng org_profile + leaders (Giới thiệu/BCH) — chạy 1 lần khi triển khai
+├── migrate_gioithieu_images.sql # Thêm cột image_urls vào org_profile — ảnh minh họa cho giới thiệu chung
 ├── setup_benefits.sql      # Bảng benefits (Quyền lợi đoàn viên) + dữ liệu mẫu — chạy 1 lần khi triển khai
 └── migrate_feedback_privacy.sql # Đóng lỗ hổng đọc toàn bộ feedback qua anon key + thêm mã tra cứu riêng — chạy 1 lần
 ```
@@ -48,8 +49,8 @@ congdoan-supabase/
 ## Supabase
 - **Project URL:** https://adcqrxupqlluqyffsykw.supabase.co
 - **Config:** `js/config.js` — chứa SUPABASE_URL, SUPABASE_ANON_KEY, APP_CONFIG
-- **Tables:** `announcements`, `documents`, `feedback` (có `lookup_code` — tra cứu công khai qua RPC `get_feedback_by_code`, KHÔNG có policy đọc trực tiếp cho anon), `admin_profiles`, `activities` (cột `image_urls` là mảng TEXT[] — 1 hoạt động có thể có nhiều ảnh), `org_profile` (1 dòng, nội dung giới thiệu chung), `leaders` (Ban Chấp hành), `benefits` (quyền lợi đoàn viên)
-- **Storage buckets:** `tai-lieu` (50MB, Office/PDF), `attachments` (10MB/ảnh, mọi loại — cũng dùng cho ảnh hoạt động, path `activities/...`)
+- **Tables:** `announcements`, `documents`, `feedback` (có `lookup_code` — tra cứu công khai qua RPC `get_feedback_by_code`, KHÔNG có policy đọc trực tiếp cho anon), `admin_profiles`, `activities` (cột `image_urls` là mảng TEXT[] — 1 hoạt động có thể có nhiều ảnh), `org_profile` (1 dòng, nội dung giới thiệu chung + cột `image_urls` mảng TEXT[] — ảnh minh họa), `leaders` (Ban Chấp hành), `benefits` (quyền lợi đoàn viên)
+- **Storage buckets:** `tai-lieu` (50MB, Office/PDF), `attachments` (10MB/ảnh, mọi loại — path `activities/...` cho ảnh hoạt động, `leaders/...` cho ảnh chân dung BCH, `org/...` cho ảnh minh họa giới thiệu chung)
 - **Free tier:** Supabase Free ~1GB storage + ~5GB băng thông/tháng. Trang quản lý hoạt động tự nén/resize ảnh (canvas, tối đa cạnh dài 1920px, JPEG q=0.82) trước khi upload để tiết kiệm hạn mức khi đăng nhiều ảnh/bài.
 - **Auth:** Email + Password. Mọi `authenticated` user đều có quyền ghi.
 

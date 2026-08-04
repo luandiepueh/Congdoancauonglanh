@@ -437,6 +437,14 @@ a.text-muted:hover { color: var(--primary) !important; }
 /* Lightbox (public gallery detail) */
 .gallery-lightbox-img { width: 100%; height: auto; display: block; border-radius: 10px; }
 
+/* Ảnh minh họa "Giới thiệu chung" */
+.intro-gallery-thumb-btn { padding: 0; border: none; background: none; cursor: pointer; border-radius: 10px; overflow: hidden; line-height: 0; }
+.intro-gallery-thumb {
+  width: 120px; height: 120px; object-fit: cover; display: block; border-radius: 10px;
+  border: 1px solid var(--glass-border); transition: transform .2s;
+}
+.intro-gallery-thumb-btn:hover .intro-gallery-thumb { transform: scale(1.05); }
+
 /* ===== FEEDBACK ITEMS ===== */
 .fb-item {
   background: #fff;

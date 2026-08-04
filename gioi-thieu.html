@@ -72,6 +72,7 @@
     <div id="introContent" style="white-space:pre-line;line-height:1.85;color:var(--text);font-size:.95rem">
       <div class="text-center py-3"><div class="spinner-border spinner-border-sm text-danger"></div></div>
     </div>
+    <div id="introGallery" class="d-flex flex-wrap gap-2 mt-3"></div>
   </div>
 
   <!-- BAN CHẤP HÀNH -->
@@ -80,6 +81,24 @@
     <div class="col-12 text-center py-4"><div class="spinner-border text-danger"></div></div>
   </div>
 
+</div>
+
+<!-- LIGHTBOX ẢNH GIỚI THIỆU -->
+<div class="modal fade" id="introImgModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius:12px;overflow:hidden;background:#000">
+      <button type="button" class="btn-close btn-close-white position-absolute" style="top:.75rem;right:.75rem;z-index:3" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      <div id="introImgCarousel" class="carousel slide" data-bs-ride="false">
+        <div class="carousel-inner" id="introImgCarouselInner"></div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#introImgCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#introImgCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <footer class="site-footer py-4 mt-3">
@@ -109,9 +128,31 @@
     return (name || '?').trim().split(/\s+/).slice(-2).map(w => w[0]).join('').toUpperCase();
   }
 
+  let introImages = [];
+
+  function renderIntroGallery() {
+    const el = document.getElementById('introGallery');
+    el.innerHTML = introImages.map((url, i) => `
+      <button type="button" class="intro-gallery-thumb-btn" onclick="openIntroImg(${i})" aria-label="Xem ảnh lớn ${i+1}">
+        <img src="${escHtml(url)}" alt="" class="intro-gallery-thumb" loading="lazy">
+      </button>`).join('');
+  }
+
+  function openIntroImg(startIndex) {
+    document.getElementById('introImgCarouselInner').innerHTML = introImages.map((url, i) => `
+      <div class="carousel-item ${i===startIndex?'active':''}">
+        <img src="${escHtml(url)}" alt="Ảnh giới thiệu ${i+1}" class="gallery-lightbox-img">
+      </div>`).join('');
+    const multi = introImages.length > 1;
+    const modalEl = document.getElementById('introImgModal');
+    modalEl.querySelector('.carousel-control-prev').classList.toggle('d-none', !multi);
+    modalEl.querySelector('.carousel-control-next').classList.toggle('d-none', !multi);
+    new bootstrap.Modal(modalEl).show();
+  }
+
   async function load() {
     const [{ data: profile }, { data: leaders }] = await Promise.all([
-      sb.from('org_profile').select('intro').eq('id', 1).maybeSingle(),
+      sb.from('org_profile').select('intro, image_urls').eq('id', 1).maybeSingle(),
       sb.from('leaders').select('*').order('display_order', { ascending: true })
     ]);
 
@@ -119,6 +160,9 @@
     introEl.textContent = profile?.intro?.trim()
       ? profile.intro
       : `${APP_CONFIG.orgName} là tổ chức đại diện, bảo vệ quyền và lợi ích hợp pháp, chính đáng của đoàn viên, người lao động; đồng hành cùng cơ quan, đơn vị chăm lo đời sống vật chất, tinh thần cho người lao động.\n\nNội dung giới thiệu chi tiết sẽ được Ban thường trực cập nhật sớm.`;
+
+    introImages = profile?.image_urls || [];
+    renderIntroGallery();
 
     const el = document.getElementById('leadersWrap');
     if (!leaders?.length) {
