@@ -650,7 +650,8 @@
     let file_name = existing?.file_name || '';
 
     if (srcMode === 'upload' && file) {
-      const path = `docs/${Date.now()}_${file.name.replace(/\s/g,'_')}`;
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `docs/${Date.now()}_${safeFileName}`;
       const { error: upErr } = await sb.storage.from('tai-lieu').upload(path, file);
       if (upErr) { showLoading(false); showToast('Upload file thất bại: '+upErr.message,'danger'); return; }
       const { data: urlData } = sb.storage.from('tai-lieu').getPublicUrl(path);

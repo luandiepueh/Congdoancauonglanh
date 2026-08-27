@@ -424,7 +424,8 @@
 
     // Upload new file
     if (file) {
-      const path = `announcements/${Date.now()}_${file.name.replace(/\s/g,'_')}`;
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `announcements/${Date.now()}_${safeFileName}`;
       const { data: upData, error: upErr } = await sb.storage.from('attachments').upload(path, file);
       if (upErr) {
         showLoading(false);
