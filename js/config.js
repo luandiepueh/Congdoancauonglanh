@@ -14,7 +14,7 @@ const APP_CONFIG = {
   orgName:    'Công đoàn Phường Cầu Ông Lãnh',
   orgSubName: 'Trực thuộc Liên đoàn Lao động TP Hồ Chí Minh ',
   email:      'congdoanp.cauonglanh@gmail.com',
-  address:    '275 Nguyễn Trãi, phường Cầu Ông Lãnh, TP.HCM'
+  address:    'Số 476 Võ Văn Kiệt, phường Cầu Ông Lãnh, Thành phố Hồ Chí Minh'
 };
 
 // ============================================================
