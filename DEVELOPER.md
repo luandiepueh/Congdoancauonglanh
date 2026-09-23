@@ -41,7 +41,8 @@ congdoan-supabase/
 ├── setup_leaders.sql       # Bảng org_profile + leaders (Giới thiệu/BCH) — chạy 1 lần khi triển khai
 ├── migrate_gioithieu_images.sql # Thêm cột image_urls vào org_profile — ảnh minh họa cho giới thiệu chung
 ├── setup_benefits.sql      # Bảng benefits (Quyền lợi đoàn viên) + dữ liệu mẫu — chạy 1 lần khi triển khai
-└── migrate_feedback_privacy.sql # Đóng lỗ hổng đọc toàn bộ feedback qua anon key + thêm mã tra cứu riêng — chạy 1 lần
+├── migrate_feedback_privacy.sql # Đóng lỗ hổng đọc toàn bộ feedback qua anon key + thêm mã tra cứu riêng — chạy 1 lần
+└── setup_site_views.sql    # Bảng site_views + hàm increment_site_view() — đếm lượt truy cập trang chủ, hiển thị trên Dashboard — chạy 1 lần khi triển khai
 ```
 
 > ⚠️ **Các file `setup_*.sql` / `migrate_*.sql` chỉ có tác dụng sau khi được chạy tay 1 lần trong Supabase SQL Editor** (Dashboard → SQL Editor → dán nội dung file → Run). Claude/AI không có quyền thực thi DDL trên Supabase (chỉ có anon key phía client, không có service role key hay kết nối Postgres trực tiếp) — mọi thay đổi schema đều cần chạy thủ công.
@@ -49,7 +50,7 @@ congdoan-supabase/
 ## Supabase
 - **Project URL:** https://adcqrxupqlluqyffsykw.supabase.co
 - **Config:** `js/config.js` — chứa SUPABASE_URL, SUPABASE_ANON_KEY, APP_CONFIG
-- **Tables:** `announcements`, `documents`, `feedback` (có `lookup_code` — tra cứu công khai qua RPC `get_feedback_by_code`, KHÔNG có policy đọc trực tiếp cho anon), `admin_profiles`, `activities` (cột `image_urls` là mảng TEXT[] — 1 hoạt động có thể có nhiều ảnh), `org_profile` (1 dòng, nội dung giới thiệu chung + cột `image_urls` mảng TEXT[] — ảnh minh họa), `leaders` (Ban Chấp hành), `benefits` (quyền lợi đoàn viên)
+- **Tables:** `announcements`, `documents` (có `download_count` — tăng qua RPC `increment_download`), `feedback` (có `lookup_code` — tra cứu công khai qua RPC `get_feedback_by_code`, KHÔNG có policy đọc trực tiếp cho anon), `admin_profiles`, `activities` (cột `image_urls` là mảng TEXT[] — 1 hoạt động có thể có nhiều ảnh), `org_profile` (1 dòng, nội dung giới thiệu chung + cột `image_urls` mảng TEXT[] — ảnh minh họa), `leaders` (Ban Chấp hành), `benefits` (quyền lợi đoàn viên), `site_views` (1 dòng, `view_count` — đếm lượt truy cập trang chủ qua RPC `increment_site_view`, chỉ admin đọc được)
 - **Storage buckets:** `tai-lieu` (50MB, Office/PDF), `attachments` (10MB/ảnh, mọi loại — path `activities/...` cho ảnh hoạt động, `leaders/...` cho ảnh chân dung BCH, `org/...` cho ảnh minh họa giới thiệu chung)
 - **Free tier:** Supabase Free ~1GB storage + ~5GB băng thông/tháng. Trang quản lý hoạt động tự nén/resize ảnh (canvas, tối đa cạnh dài 1920px, JPEG q=0.82) trước khi upload để tiết kiệm hạn mức khi đăng nhiều ảnh/bài.
 - **Auth:** Email + Password. Mọi `authenticated` user đều có quyền ghi.

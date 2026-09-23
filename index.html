@@ -350,6 +350,12 @@
     if (session) document.getElementById('adminNav').classList.remove('d-none');
   });
 
+  // Đếm lượt truy cập trang chủ (1 lần / phiên duyệt web)
+  if (!sessionStorage.getItem('siteViewCounted')) {
+    sessionStorage.setItem('siteViewCounted', '1');
+    sb.rpc('increment_site_view').then(() => {}, () => {});
+  }
+
   let homeAncs = [], ancCurIdx = 0;
 
   async function loadHome() {

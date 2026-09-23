@@ -68,28 +68,40 @@
 
       <!-- STATS -->
       <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4 col-lg-2">
           <div class="stat-card">
             <div class="stat-icon" style="background:#fce4ec"><i class="bi bi-megaphone-fill text-danger"></i></div>
             <div><div class="stat-val" id="sAnc">—</div><div class="stat-label">Thông báo</div></div>
           </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4 col-lg-2">
           <div class="stat-card">
             <div class="stat-icon" style="background:#fff3e0"><i class="bi bi-folder2-open" style="color:#e65100"></i></div>
             <div><div class="stat-val" id="sDoc">—</div><div class="stat-label">Tài liệu</div></div>
           </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4 col-lg-2">
           <div class="stat-card">
             <div class="stat-icon" style="background:#e8f5e9"><i class="bi bi-chat-left-dots-fill text-success"></i></div>
             <div><div class="stat-val" id="sFbAll">—</div><div class="stat-label">Tổng góp ý</div></div>
           </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4 col-lg-2">
           <div class="stat-card">
             <div class="stat-icon" style="background:#fff8e1"><i class="bi bi-clock-fill" style="color:#f57f17"></i></div>
             <div><div class="stat-val text-warning" id="sFbPending">—</div><div class="stat-label">Chờ phản hồi</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#e3f2fd"><i class="bi bi-eye-fill" style="color:#1565c0"></i></div>
+            <div><div class="stat-val" id="sViews">—</div><div class="stat-label">Lượt truy cập</div></div>
+          </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#ede7f6"><i class="bi bi-download" style="color:#5e35b1"></i></div>
+            <div><div class="stat-val" id="sDl">—</div><div class="stat-label">Lượt tải tài liệu</div></div>
           </div>
         </div>
       </div>
@@ -148,20 +160,26 @@
       { count: fbAll },
       { count: fbPending },
       { data: pendingFb },
-      { data: recentAnc }
+      { data: recentAnc },
+      { data: siteViews },
+      { data: docDownloads }
     ] = await Promise.all([
       sb.from('announcements').select('*',{count:'exact',head:true}),
       sb.from('documents').select('*',{count:'exact',head:true}),
       sb.from('feedback').select('*',{count:'exact',head:true}),
       sb.from('feedback').select('*',{count:'exact',head:true}).eq('status','Chờ xử lý'),
       sb.from('feedback').select('*').eq('status','Chờ xử lý').order('created_at',{ascending:false}).limit(8),
-      sb.from('announcements').select('*').order('created_at',{ascending:false}).limit(6)
+      sb.from('announcements').select('*').order('created_at',{ascending:false}).limit(6),
+      sb.from('site_views').select('view_count').eq('id',1).maybeSingle(),
+      sb.from('documents').select('download_count')
     ]);
 
     document.getElementById('sAnc').textContent      = ancCnt ?? 0;
     document.getElementById('sDoc').textContent      = docCnt ?? 0;
     document.getElementById('sFbAll').textContent    = fbAll  ?? 0;
     document.getElementById('sFbPending').textContent = fbPending ?? 0;
+    document.getElementById('sViews').textContent    = siteViews?.view_count ?? 0;
+    document.getElementById('sDl').textContent       = (docDownloads||[]).reduce((sum,d) => sum + (d.download_count||0), 0);
 
     if (fbPending > 0) {
       const b = document.getElementById('sbBadge');
